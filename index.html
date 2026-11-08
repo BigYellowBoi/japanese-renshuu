@@ -141,17 +141,22 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .bar>i{display:block;height:100%;border-radius:999px;background:var(--accent);transition:width .5s}
 
 /* Menu */
-.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
-.tile{display:flex;align-items:center;gap:10px;text-align:left;background:var(--input);border:1px solid var(--line-soft);border-radius:12px;padding:9px 10px;cursor:pointer;color:var(--text);min-width:0;transition:border-color .15s,background .15s}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+@media(min-width:768px){.tiles{grid-template-columns:repeat(5,1fr);gap:8px}}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;background:var(--input);border:1px solid var(--line-soft);border-radius:10px;padding:7px 8px;cursor:pointer;color:var(--text);min-width:0;transition:border-color .15s,background .15s}
 .tile:hover{border-color:var(--line)}
-.tile .gl{width:34px;height:34px;border-radius:9px;background:var(--raised);display:grid;place-items:center;font-family:var(--jp);font-weight:700;font-size:15px;color:var(--text-2);flex:none;letter-spacing:-.04em}
-.tile .gl svg{width:16px;height:16px}
-.tile .nm{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tile .ct{font-size:11.5px;color:var(--label);font-variant-numeric:tabular-nums}
+.tile .top{display:flex;align-items:center;justify-content:space-between;width:100%;gap:4px}
+.tile .gl{height:22px;min-width:22px;padding:0 4px;border-radius:6px;background:var(--raised);display:grid;place-items:center;font-family:var(--jp);font-weight:700;font-size:12px;color:var(--text-2);letter-spacing:-.04em}
+.tile .gl svg{width:12px;height:12px}
+.tile .nm{font-size:12.5px;font-weight:500;line-height:1.2;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .ct{font-size:11px;color:var(--label);font-variant-numeric:tabular-nums}
 .tile[aria-pressed='true']{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 50%,transparent)}
 .tile[aria-pressed='true'] .gl{background:var(--accent);color:var(--on-accent)}
-.tile .minibar{height:3px;border-radius:999px;background:var(--raised);margin-top:4px;overflow:hidden}
+.tile .minibar{height:2px;border-radius:999px;background:var(--raised);width:100%;overflow:hidden}
 .tile .minibar i{display:block;height:100%;background:var(--accent)}
+/* Start bar stays on screen while the categories scroll. */
+.startbar{position:sticky;bottom:0;z-index:4;display:flex;flex-direction:column;gap:8px;margin:0 -16px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(180deg,transparent,var(--ground) 28%)}
+@media(min-width:768px){.startbar{margin:0;padding:12px 0 16px}}
 
 /* Overlay sheet */
 .overlay{position:fixed;inset:0;background:#05030acc;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px;padding-top:calc(16px + env(safe-area-inset-top))}
@@ -275,7 +280,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
     <div class="card-head"><h2>Categories</h2><div class="right chiprow" id="group-chips"></div></div>
     <div class="tiles" id="cat-grid"></div>
   </div>
-  <div class="stack">
+  <div class="startbar">
     <button class="btn primary big full" id="start-quiz-btn" onclick="openQuizModal()">Start quiz</button>
     <div class="grid2"><button class="btn full" onclick="showScreen('browse')" data-ico="list" data-label="Browse words"></button><button class="btn full" onclick="showScreen('add')" data-ico="plus" data-label="Add words"></button></div>
   </div>
@@ -322,7 +327,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 </div>
 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
 <script>
-const CATEGORIES={hiragana:{name:"Hiragana",icon:"あ"},katakana:{name:"Katakana",icon:"ア"},hiragana_combo:{name:"Hiragana combos",icon:"きゃ"},katakana_combo:{name:"Katakana combos",icon:"キャ"},greetings:{name:"Greetings",icon:"挨"},numbers:{name:"Numbers",icon:"数"},food:{name:"Food & drink",icon:"食"},shopping:{name:"Shopping",icon:"買"},directions:{name:"Directions",icon:"道"},transport:{name:"Transport",icon:"車"},accommodation:{name:"Accommodation",icon:"宿"},restaurant:{name:"Restaurant",icon:"店"},sightseeing:{name:"Sightseeing",icon:"観"},time:{name:"Time & days",icon:"時"},people:{name:"People",icon:"人"},adjectives:{name:"Adjectives",icon:"形"},verbs:{name:"Verbs",icon:"動"},essentials:{name:"Essentials",icon:"要"},conversation:{name:"Conversation",icon:"話"},slang:{name:"Slang",icon:"俗"},jlpt_n5:{name:"JLPT N5",icon:"N5"},jlpt_n4:{name:"JLPT N4",icon:"N4"},jlpt_n3:{name:"JLPT N3",icon:"N3"},jlpt_n2:{name:"JLPT N2",icon:"N2"},jlpt_n1:{name:"JLPT N1",icon:"N1"},custom:{name:"Custom",icon:"自"}};
+const CATEGORIES={hiragana:{name:"Hiragana",icon:"あ"},katakana:{name:"Katakana",icon:"ア"},hiragana_combo:{name:"Combos",icon:"きゃ"},katakana_combo:{name:"Combos",icon:"キャ"},greetings:{name:"Greetings",icon:"挨"},numbers:{name:"Numbers",icon:"数"},food:{name:"Food & drink",icon:"食"},shopping:{name:"Shopping",icon:"買"},directions:{name:"Directions",icon:"道"},transport:{name:"Transport",icon:"車"},accommodation:{name:"Lodging",icon:"宿"},restaurant:{name:"Restaurant",icon:"店"},sightseeing:{name:"Sightseeing",icon:"観"},time:{name:"Time & days",icon:"時"},people:{name:"People",icon:"人"},adjectives:{name:"Adjectives",icon:"形"},verbs:{name:"Verbs",icon:"動"},essentials:{name:"Essentials",icon:"要"},conversation:{name:"Conversation",icon:"話"},slang:{name:"Slang",icon:"俗"},jlpt_n5:{name:"JLPT N5",icon:"N5"},jlpt_n4:{name:"JLPT N4",icon:"N4"},jlpt_n3:{name:"JLPT N3",icon:"N3"},jlpt_n2:{name:"JLPT N2",icon:"N2"},jlpt_n1:{name:"JLPT N1",icon:"N1"},custom:{name:"Custom",icon:"自"}};
 const CAT_ORDER=Object.keys(CATEGORIES);
 // Combos sit outside the default selection: with nothing picked, a quiz covers every other category.
 const OPT_IN_CATS=['hiragana_combo','katakana_combo'];
@@ -1988,7 +1993,7 @@ function renderMenu(){
   const cats=getActiveCats();let grid='';
   const tile=(id,glyph,name,words)=>{
     const m=words.filter(w=>getStars(w.id)>=9).length;const sel=selectedCats.has(id);
-    return '<button class="tile" aria-pressed="'+sel+'" onclick="toggleCat(\''+id+'\')"><span class="gl">'+glyph+'</span><span style="min-width:0;flex:1"><span class="nm" style="display:block">'+name+'</span><span class="ct">'+m+' / '+words.length+'</span><span class="minibar"><i style="width:'+(words.length?m/words.length*100:0)+'%"></i></span></span></button>';
+    return '<button class="tile" aria-pressed="'+sel+'" onclick="toggleCat(\''+id+'\')" title="'+name+'"><span class="top"><span class="gl">'+glyph+'</span><span class="ct">'+m+'/'+words.length+'</span></span><span class="nm">'+name+'</span><span class="minibar"><i style="width:'+(words.length?m/words.length*100:0)+'%"></i></span></button>';
   };
   cats.forEach(c=>{const info=CATEGORIES[c]||{name:c,icon:'?'};grid+=tile(c,info.icon,info.name,all.filter(w=>w.cat===c))});
   favLists.forEach((l,i)=>{if(l.ids.length===0)return;grid+=tile('fav-'+i,ico('heart',true),escapeHTML(l.name),all.filter(w=>l.ids.includes(w.id)))});
