@@ -75,6 +75,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 .head{display:flex;align-items:center;gap:12px}
 .head .grow{flex:1;min-width:0}
 .mark{width:40px;height:40px;border-radius:12px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-family:var(--jp);font-weight:700;font-size:20px;flex:none;box-shadow:0 0 22px color-mix(in srgb,var(--accent) 35%,transparent)}
+/* Hinomaru in Axiom colours: a 3:2 light flag with the accent disc. */
+.flag{width:48px;height:32px;border-radius:7px;background:var(--text);display:grid;place-items:center;flex:none;box-shadow:0 0 0 1px var(--line),0 0 22px color-mix(in srgb,var(--accent) 30%,transparent)}
+.flag i{width:19px;height:19px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px color-mix(in srgb,var(--accent) 60%,transparent)}
 h1{font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
 h1 .jp{font-weight:700}
 @media(min-width:768px){h1{font-size:30px}}
@@ -280,7 +283,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 
 <div id="screen-menu" class="stack" style="gap:16px">
   <div class="head">
-    <div class="mark">日</div>
+    <div class="flag" role="img" aria-label="Japanese flag"><i></i></div>
     <div class="grow"><h1><span class="jp">日本語練習</span></h1><div class="sub" id="menu-mastered-text"></div></div>
     <button class="btn ghost sq" onclick="openStats()" title="Stats" aria-label="Stats" data-ico="chart"></button>
     <button class="btn ghost sq" onclick="openSettings()" title="Settings" aria-label="Settings" data-ico="gear"></button>
@@ -339,7 +342,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
 <script>
 const CATEGORIES={hiragana:{name:"Hiragana",icon:"あ"},katakana:{name:"Katakana",icon:"ア"},hiragana_combo:{name:"Combos",icon:"きゃ"},katakana_combo:{name:"Combos",icon:"キャ"},greetings:{name:"Greetings",icon:"挨"},numbers:{name:"Numbers",icon:"数"},food:{name:"Food & drink",icon:"食"},shopping:{name:"Shopping",icon:"買"},directions:{name:"Directions",icon:"道"},transport:{name:"Transport",icon:"車"},accommodation:{name:"Lodging",icon:"宿"},restaurant:{name:"Restaurant",icon:"店"},sightseeing:{name:"Sightseeing",icon:"観"},time:{name:"Time & days",icon:"時"},people:{name:"People",icon:"人"},adjectives:{name:"Adjectives",icon:"形"},verbs:{name:"Verbs",icon:"動"},essentials:{name:"Essentials",icon:"要"},conversation:{name:"Conversation",icon:"話"},slang:{name:"Slang",icon:"俗"},jlpt_n5:{name:"JLPT N5",icon:"N5"},jlpt_n4:{name:"JLPT N4",icon:"N4"},jlpt_n3:{name:"JLPT N3",icon:"N3"},jlpt_n2:{name:"JLPT N2",icon:"N2"},jlpt_n1:{name:"JLPT N1",icon:"N1"},custom:{name:"Custom",icon:"自"}};
-const APP_VERSION='2026-11-08.4';
+const APP_VERSION='2026-11-08.5';
 const CAT_ORDER=Object.keys(CATEGORIES);
 // Combos sit outside the default selection: with nothing picked, a quiz covers every other category.
 const OPT_IN_CATS=['hiragana_combo','katakana_combo'];
