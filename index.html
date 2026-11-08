@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=overlays-content">
 <meta name="theme-color" content="#0b0812">
+<script>
+// Home-screen app on iOS: navigator.standalone is the reliable signal (the display-mode query
+// needs a web app manifest, which this page doesn't have).
+if(navigator.standalone===true||matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches)document.documentElement.classList.add('standalone');
+</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -44,6 +49,7 @@
 /* iOS blurs a band about 14pt below the status bar in home-screen apps (Axiom CLAUDE.md, iOS notes):
    drop the content 14pt and keep a solid strip over the status bar and the band, so nothing scrolls into the blur. */
 @media (display-mode:standalone){html:root{--hdrdrop:14px}}
+html.standalone:root{--hdrdrop:14px}
 body::after{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-area-inset-top) + var(--hdrdrop));background:var(--ground);z-index:60;pointer-events:none}
 *{box-sizing:border-box;margin:0;padding:0}
 ::-webkit-scrollbar{width:12px;height:12px}
@@ -333,6 +339,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
 <script>
 const CATEGORIES={hiragana:{name:"Hiragana",icon:"あ"},katakana:{name:"Katakana",icon:"ア"},hiragana_combo:{name:"Combos",icon:"きゃ"},katakana_combo:{name:"Combos",icon:"キャ"},greetings:{name:"Greetings",icon:"挨"},numbers:{name:"Numbers",icon:"数"},food:{name:"Food & drink",icon:"食"},shopping:{name:"Shopping",icon:"買"},directions:{name:"Directions",icon:"道"},transport:{name:"Transport",icon:"車"},accommodation:{name:"Lodging",icon:"宿"},restaurant:{name:"Restaurant",icon:"店"},sightseeing:{name:"Sightseeing",icon:"観"},time:{name:"Time & days",icon:"時"},people:{name:"People",icon:"人"},adjectives:{name:"Adjectives",icon:"形"},verbs:{name:"Verbs",icon:"動"},essentials:{name:"Essentials",icon:"要"},conversation:{name:"Conversation",icon:"話"},slang:{name:"Slang",icon:"俗"},jlpt_n5:{name:"JLPT N5",icon:"N5"},jlpt_n4:{name:"JLPT N4",icon:"N4"},jlpt_n3:{name:"JLPT N3",icon:"N3"},jlpt_n2:{name:"JLPT N2",icon:"N2"},jlpt_n1:{name:"JLPT N1",icon:"N1"},custom:{name:"Custom",icon:"自"}};
+const APP_VERSION='2026-11-08.4';
 const CAT_ORDER=Object.keys(CATEGORIES);
 // Combos sit outside the default selection: with nothing picked, a quiz covers every other category.
 const OPT_IN_CATS=['hiragana_combo','katakana_combo'];
@@ -2659,7 +2666,8 @@ function openSettings(){
     <div class="field"><span class="label">Sound</span><div class="row"><button class="btn small sq" id="settings-vol-icon" onclick="toggleMute()" aria-label="Mute"></button><input type="range" min="0" max="100" id="settings-volume-slider" oninput="setVolume(this.value)" value="${Math.round(volume*100)}"></div></div>
     <div class="field"><span class="label">Your data</span><div class="grid2"><button class="btn" onclick="exportData()">Export</button><button class="btn" onclick="document.getElementById('import-file').click()">Import</button></div></div>
     <button class="btn danger full" onclick="resetProgress(this)">Reset progress</button>
-    <button class="btn full" onclick="closeSheet(this)">Done</button>`);
+    <button class="btn full" onclick="closeSheet(this)">Done</button>
+    <div class="sub" style="text-align:center">Version ${APP_VERSION}${document.documentElement.classList.contains('standalone')?' · home-screen app':''}</div>`);
   updateSettingsVolIcon();
 }
 function updateSettingsVolIcon(){
