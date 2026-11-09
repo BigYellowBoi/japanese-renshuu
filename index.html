@@ -346,7 +346,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
 <script>
 const CATEGORIES={hiragana:{name:"Hiragana",icon:"あ"},katakana:{name:"Katakana",icon:"ア"},hiragana_combo:{name:"Combos",icon:"きゃ"},katakana_combo:{name:"Combos",icon:"キャ"},greetings:{name:"Greetings",icon:"挨",pic:"hand-stop"},numbers:{name:"Numbers",icon:"数",pic:"abacus"},food:{name:"Food & drink",icon:"食",pic:"bowl-chopsticks"},shopping:{name:"Shopping",icon:"買",pic:"shopping-bag"},directions:{name:"Directions",icon:"道",pic:"compass"},transport:{name:"Transport",icon:"車",pic:"train"},accommodation:{name:"Lodging",icon:"宿",pic:"bed"},restaurant:{name:"Restaurant",icon:"店",pic:"tools-kitchen-2"},sightseeing:{name:"Sightseeing",icon:"観",pic:"torii"},time:{name:"Time & days",icon:"時",pic:"clock"},people:{name:"People",icon:"人",pic:"users"},adjectives:{name:"Adjectives",icon:"形",pic:"sparkles"},verbs:{name:"Verbs",icon:"動",pic:"run"},essentials:{name:"Essentials",icon:"要",pic:"first-aid-kit"},conversation:{name:"Conversation",icon:"話",pic:"messages"},slang:{name:"Slang",icon:"俗",pic:"flame"},jlpt_n5:{name:"JLPT N5",icon:"N5"},jlpt_n4:{name:"JLPT N4",icon:"N4"},jlpt_n3:{name:"JLPT N3",icon:"N3"},jlpt_n2:{name:"JLPT N2",icon:"N2"},jlpt_n1:{name:"JLPT N1",icon:"N1"},custom:{name:"Custom",icon:"自",pic:"pencil"}};
-const APP_VERSION='2026-11-10.1';
+const APP_VERSION='2026-11-10.2';
 const CAT_ORDER=Object.keys(CATEGORIES);
 // Combos sit outside the default selection: with nothing picked, a quiz covers every other category.
 const OPT_IN_CATS=['hiragana_combo','katakana_combo'];
@@ -1737,6 +1737,8 @@ function getLifetimeStats(){try{return JSON.parse(localStorage.getItem(STORAGE.l
 function saveLifetimeStats(s){localStorage.setItem(STORAGE.lifetimeStats,JSON.stringify(s))}
 function recordCorrect(){const s=getLifetimeStats();s.correct++;saveLifetimeStats(s);logActivity('correct')}
 function recordIncorrect(){const s=getLifetimeStats();s.incorrect++;saveLifetimeStats(s);logActivity('incorrect')}
+function unrecordIncorrect(){const s=getLifetimeStats();s.incorrect=Math.max(0,s.incorrect-1);saveLifetimeStats(s);
+  try{const log=getActivityLog(),d=today();if(log[d]&&log[d].incorrect>0){log[d].incorrect--;localStorage.setItem(STORAGE.activityLog,JSON.stringify(log))}}catch{}}
 function logActivity(type){
   updateStreak();
   try{
@@ -1777,7 +1779,9 @@ function migrateMerged(){
   if(changed)saveProgress();
 }
 function saveProgress(){localStorage.setItem(STORAGE.progress,JSON.stringify(progress))}
-function setProg(id,stars,wrongCount){progress[id]={stars,wrongCount,seen:Date.now()};saveProgress()}
+function setProg(id,stars,wrongCount,credited){const day=credited?today():(progress[id]&&progress[id].day);progress[id]={stars,wrongCount,seen:Date.now()};if(day)progress[id].day=day;saveProgress()}
+// A word earns at most one star a day, so repeating it in one sitting cannot stand in for remembering it later.
+function creditedToday(id){return !!(progress[id]&&progress[id].day===today())}
 function saveCustom(){_glossCache=null;localStorage.setItem(STORAGE.custom,JSON.stringify(customWords))}
 function saveOverrides(){_glossCache=null;localStorage.setItem(STORAGE.overrides,JSON.stringify(wordOverrides))}
 
@@ -2125,7 +2129,7 @@ function startQuiz(){
     if(sorted.length===0){notice('No difficult words yet','A word lands here after 3 wrong answers.');return}
   } else {
     // Due reviews first (longest overdue first), then words begun but not yet starred (longest unseen first),
-    // then new words. Words not due yet come last, as early practice that earns nothing.
+    // then new words. Words not due yet come last; they still count, once a day.
     const due=sortDue(activeWords.filter(isDue));
     const begun=activeWords.filter(w=>getStars(w.id)===0&&(w.id in progress)).sort((x,y)=>(progress[x.id].seen||0)-(progress[y.id].seen||0));
     const fresh=shuffle(activeWords.filter(w=>!(w.id in progress)));
@@ -2155,6 +2159,7 @@ function requeueWord(w){
   const insertAt=Math.min(quizIdx+1+Math.max(1,insertAfter),quizQueue.length);
   quizQueue.splice(insertAt,0,w);
   b.lastSeen=quizIdx;
+  return insertAt;
 }
 
 function startTimer(){
@@ -2176,18 +2181,35 @@ function timeUp(){
   gradeAnswer(w,false,true);
   speakJapanese(w.japanese,w.furigana);renderQuiz();
 }
+let _undo=null; // the last typed miss, while its card is still showing
+function undoMiss(){
+  const u=_undo;if(!u||quizFeedback!=='wrong')return;const w=quizQueue[quizIdx];if(!w||w.id!==u.id)return;
+  _undo=null;playClick();
+  if(u.prog)progress[u.id]=u.prog;else delete progress[u.id];saveProgress();
+  const srs=_loadSRS();if(u.srs)srs[u.id]=u.srs;else delete srs[u.id];_saveSRS();
+  sessionBuckets[u.id]=u.sb;
+  if(quizQueue[u.at]&&quizQueue[u.at].id===u.id&&u.at>quizIdx)quizQueue.splice(u.at,1);
+  if(u.newWrong)sessionWrong=sessionWrong.filter(x=>x.id!==u.id);
+  if(u.prev)_justPreviewed.add(u.id);
+  unrecordIncorrect();quizAnswered--;currentStreak=u.streak;quizFeedback=null;
+  gradeAnswer(w,true);renderQuiz();
+}
 // One place decides what an answer does to the session count, the stars and the review day.
 function gradeAnswer(w,isCorrect,timedOut){
   const practice=quizMode==='conjugation'; // conjugation drills never move stars or review days
   const full=SESSION_GAPS.length;
   const sb=sessionBuckets[w.id]||(sessionBuckets[w.id]={bucket:0,lastSeen:-99});
   const stars=getStars(w.id),wc=getWrongCount(w.id),due=isDueForReview(w.id);
-  _lastGain=false;_lastNote='';quizAnswered++;_feedbackShownAt=Date.now();
+  _lastGain=false;_lastNote='';quizAnswered++;_feedbackShownAt=Date.now();_undo=null;
   if(!isCorrect){
+    // Kept so a typed slip can be taken back with "That was a typo" (not for Choice taps or time-outs).
+    const snap={id:w.id,prog:progress[w.id]?{...progress[w.id]}:null,srs:_loadSRS()[w.id]?{..._loadSRS()[w.id]}:null,sb:{...sb},streak:currentStreak,
+      newWrong:!sessionWrong.some(x=>x.id===w.id),prev:_justPreviewed.has(w.id)};
     quizFeedback='wrong';currentStreak=0;recordIncorrect();if(timedOut)playTimerOut();else playWrong();
-    if(!sessionWrong.some(x=>x.id===w.id))sessionWrong.push(w);
+    if(snap.newWrong)sessionWrong.push(w);
     _justPreviewed.delete(w.id);
-    sb.bucket=0;sb.missed=true;requeueWord(w);
+    sb.bucket=0;sb.missed=true;snap.at=requeueWord(w);
+    if(!timedOut&&quizMode!=='choice')_undo=snap;
     if(!practice){
       // Back to the start of the current level; a Mastered word falls to Strong. Due again tomorrow.
       const ns=stars>=9?6:Math.floor(stars/3)*3;
@@ -2210,13 +2232,14 @@ function gradeAnswer(w,isCorrect,timedOut){
   if(sb.bucket<full){requeueWord(w);if(!practice)setProg(w.id,stars,wc);playCorrect();return}
   let ns=stars;
   if(!practice){
-    if(stars===0){ns=1;scheduleForStar(w.id,1);_lastNote='Next review '+nextReviewText(w.id)}
+    let credit=false;
+    if(stars===0){ns=1;credit=true;scheduleForStar(w.id,1);_lastNote='Next review '+nextReviewText(w.id)}
     else if(sb.missed){_lastNote=isDueForReview(w.id)?'No star this time. It stays due':'Next review '+nextReviewText(w.id)}
-    else if(!due){_lastNote='Early practice. Next review '+nextReviewText(w.id)}
+    else if(creditedToday(w.id)){_lastNote='Already counted today. Next review '+nextReviewText(w.id)}
     else if(quizMode==='choice'&&stars>=CHOICE_STAR_CAP){_lastNote='Choice stops at '+CHOICE_STAR_CAP+' stars. Type the answer to move this word on'}
-    else if(stars>=9){stretchMastered(w.id);_lastNote='Next review '+nextReviewText(w.id)}
-    else{ns=stars+1;scheduleForStar(w.id,ns);_lastNote='Next review '+nextReviewText(w.id)}
-    setProg(w.id,ns,ns>=9?0:wc);
+    else if(stars>=9){credit=true;stretchMastered(w.id);_lastNote='Next review '+nextReviewText(w.id)}
+    else{ns=stars+1;credit=true;scheduleForStar(w.id,ns);_lastNote='Next review '+nextReviewText(w.id)}
+    setProg(w.id,ns,ns>=9?0:wc,credit);
   }
   _lastGain=ns>stars;
   if(_lastGain&&(ns===9||ns===3||ns===6))playThreeStars();
@@ -2364,7 +2387,7 @@ function renderQuiz(){
     let h='<div class="verdict bad">Not quite</div>';
     if(quizMode==='conjugation')h+=conjLine();
     else h+='<div class="ans"><b>'+escapeHTML(w.english.join(', '))+'</b></div>';
-    h+=jpLine+'<div class="typed">You answered '+escapeHTML(quizLastInput)+'</div>'+wrongSuffix+noteLine+exampleHTML(w);fbArea.innerHTML=h}
+    h+=jpLine+'<div class="typed">You answered '+escapeHTML(quizLastInput)+'</div>'+wrongSuffix+noteLine+(_undo&&_undo.id===w.id?'<button class="btn small" onclick="undoMiss()">That was a typo</button>':'')+exampleHTML(w);fbArea.innerHTML=h}
   else fbArea.innerHTML='';
 
   const inputArea=document.getElementById('quiz-input-area');
@@ -2420,8 +2443,8 @@ function showQuizInfo(){
       <p><b><span class="lvdot lv2"></span> Familiar, stars 3 to 5</b></p>
       <p><b><span class="lvdot lv3"></span> Strong, stars 6 to 8</b></p>
       <p><b><span class="lvdot lv4"></span> Mastered, 9 stars</b>About 3 months of right answers. Reviews then stretch further apart, up to a year.</p>
-      <p><b>Wrong answers</b>Stars drop to the start of the current level (Mastered drops to Strong) and the word is due again tomorrow.</p>
-      <p><b>What does not count</b>An answer given with the reading shown. A word practised before its review day. Choice mode above ${CHOICE_STAR_CAP} stars. Conjugate mode is practice only and never changes stars.</p>
+      <p><b>Wrong answers</b>Stars drop to the start of the current level (Mastered drops to Strong) and the word is due again tomorrow. If a typed answer was only a slip, tap "That was a typo" on the card to take it back.</p>
+      <p><b>What does not count</b>An answer given with the reading shown. A second go at the same word on one day (a word earns one star a day at most, early or not). Choice mode above ${CHOICE_STAR_CAP} stars. Conjugate mode is practice only and never changes stars.</p>
     </div>
     <button class="btn full" onclick="closeSheet(this)">Got it</button>`);
 }
@@ -2435,7 +2458,7 @@ function showQuizHint(){
   if(restored&&saved){restored.value=saved;restored.selectionStart=saved.length;restored.selectionEnd=saved.length;}
 }
 function nextQuiz(){
-  playClick();
+  playClick();_undo=null;
   quizFeedback=null;quizShowHint=false;quizLastInput="";quizIdx++;renderQuiz();
 }
 function quizKeydown(e){if(e.key==='Enter'){if(quizFeedback)nextQuiz();else submitQuiz()}}
