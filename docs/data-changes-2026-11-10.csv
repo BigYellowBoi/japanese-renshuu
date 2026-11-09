@@ -1,0 +1,17 @@
+change,id,word,detail
+jlpt,n5-1161,杯,N1 -> N5 (counter はい; the N1 entry is さかずき)
+jlpt,n5-1122,嬉しい,N5 -> N4
+jlpt,n3-3002,締め切り,N3 -> N2
+meaning,ti-335,昼,"removed ""afternoon"" (午後); added ""midday"""
+meaning,n4-2070,減る,"removed ""reduce"" (減らす); added ""go down"""
+meaning,n2-4015,裁判,"""court"" -> ""court case"" (court is 裁判所)"
+meaning,n2-4002,議員,"removed ""politician""; added ""assembly member"" and ""legislator"""
+meaning,n3-3121,幸運,"leads with the noun ""good luck""; ""lucky"" still accepted"
+meaning,n1-5010,是非,"leads with ""by all means"" (the N4 sense)"
+wording,co-455,趣味はありますか,was 趣味がありますか
+alternative reading,nu-172,四,EN to JP also accepts し
+alternative reading,nu-175,七,EN to JP also accepts しち
+alternative reading,nu-177,九,EN to JP also accepts く
+alternative reading,ti-332,明日,EN to JP also accepts あす
+alternative reading,pe-357,私,EN to JP also accepts わたくし
+alternative reading,n5-1062,家,EN to JP also accepts うち

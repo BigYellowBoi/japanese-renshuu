@@ -157,11 +157,13 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 /* Menu */
 .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 @media(min-width:768px){.tiles{grid-template-columns:repeat(5,1fr);gap:8px}}
-.tile{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;background:var(--input);border:1px solid var(--line-soft);border-radius:10px;padding:7px 8px;cursor:pointer;color:var(--text);min-width:0;transition:border-color .15s,background .15s}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;background:var(--input);border:1px solid var(--line-soft);border-radius:10px;padding:7px 8px;cursor:pointer;color:var(--text);min-width:0;transition:border-color .15s,background .15s}
 .tile:hover{border-color:var(--line)}
 .tile .top{display:flex;align-items:center;justify-content:space-between;width:100%;gap:4px}
-.tile .gl{height:22px;min-width:22px;padding:0 4px;border-radius:6px;background:var(--raised);display:grid;place-items:center;font-family:var(--jp);font-weight:700;font-size:12px;color:var(--text-2);letter-spacing:-.04em}
+.tile .gl{height:24px;min-width:24px;padding:0 4px;border-radius:6px;background:var(--raised);display:grid;place-items:center;font-family:var(--jp);font-weight:700;font-size:12px;color:var(--text-2);letter-spacing:-.04em}
 .tile .gl svg{width:12px;height:12px}
+.tile .gl.pic{width:24px;height:24px;padding:0;background:var(--accent-soft);color:var(--accent)}
+.tile .gl.pic svg{width:15px;height:15px}
 .tile .nm{font-size:12.5px;font-weight:500;line-height:1.2;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tile .ct{font-size:11px;color:var(--label);font-variant-numeric:tabular-nums}
 .tile[aria-pressed='true']{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 50%,transparent)}
@@ -253,6 +255,8 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .bnav{display:none}
 .group-label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text);scroll-margin-top:200px;padding:4px 0}
 .group-label .gl{width:24px;height:24px;border-radius:7px;background:var(--raised);display:grid;place-items:center;font-family:var(--jp);font-size:11px;font-weight:700;color:var(--text-2);letter-spacing:-.04em}
+.group-label .gl.pic{background:var(--accent-soft);color:var(--accent)}
+.group-label .gl svg{width:14px;height:14px}
 .group-label .n{color:var(--label);font-weight:400}
 .group-label .right{margin-left:auto}
 .mnav{display:flex;flex-direction:column;gap:6px}
@@ -341,8 +345,8 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 </div>
 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
 <script>
-const CATEGORIES={hiragana:{name:"Hiragana",icon:"あ"},katakana:{name:"Katakana",icon:"ア"},hiragana_combo:{name:"Combos",icon:"きゃ"},katakana_combo:{name:"Combos",icon:"キャ"},greetings:{name:"Greetings",icon:"挨"},numbers:{name:"Numbers",icon:"数"},food:{name:"Food & drink",icon:"食"},shopping:{name:"Shopping",icon:"買"},directions:{name:"Directions",icon:"道"},transport:{name:"Transport",icon:"車"},accommodation:{name:"Lodging",icon:"宿"},restaurant:{name:"Restaurant",icon:"店"},sightseeing:{name:"Sightseeing",icon:"観"},time:{name:"Time & days",icon:"時"},people:{name:"People",icon:"人"},adjectives:{name:"Adjectives",icon:"形"},verbs:{name:"Verbs",icon:"動"},essentials:{name:"Essentials",icon:"要"},conversation:{name:"Conversation",icon:"話"},slang:{name:"Slang",icon:"俗"},jlpt_n5:{name:"JLPT N5",icon:"N5"},jlpt_n4:{name:"JLPT N4",icon:"N4"},jlpt_n3:{name:"JLPT N3",icon:"N3"},jlpt_n2:{name:"JLPT N2",icon:"N2"},jlpt_n1:{name:"JLPT N1",icon:"N1"},custom:{name:"Custom",icon:"自"}};
-const APP_VERSION='2026-11-08.6';
+const CATEGORIES={hiragana:{name:"Hiragana",icon:"あ"},katakana:{name:"Katakana",icon:"ア"},hiragana_combo:{name:"Combos",icon:"きゃ"},katakana_combo:{name:"Combos",icon:"キャ"},greetings:{name:"Greetings",icon:"挨",pic:"hand-stop"},numbers:{name:"Numbers",icon:"数",pic:"abacus"},food:{name:"Food & drink",icon:"食",pic:"bowl-chopsticks"},shopping:{name:"Shopping",icon:"買",pic:"shopping-bag"},directions:{name:"Directions",icon:"道",pic:"compass"},transport:{name:"Transport",icon:"車",pic:"train"},accommodation:{name:"Lodging",icon:"宿",pic:"bed"},restaurant:{name:"Restaurant",icon:"店",pic:"tools-kitchen-2"},sightseeing:{name:"Sightseeing",icon:"観",pic:"torii"},time:{name:"Time & days",icon:"時",pic:"clock"},people:{name:"People",icon:"人",pic:"users"},adjectives:{name:"Adjectives",icon:"形",pic:"sparkles"},verbs:{name:"Verbs",icon:"動",pic:"run"},essentials:{name:"Essentials",icon:"要",pic:"first-aid-kit"},conversation:{name:"Conversation",icon:"話",pic:"messages"},slang:{name:"Slang",icon:"俗",pic:"flame"},jlpt_n5:{name:"JLPT N5",icon:"N5"},jlpt_n4:{name:"JLPT N4",icon:"N4"},jlpt_n3:{name:"JLPT N3",icon:"N3"},jlpt_n2:{name:"JLPT N2",icon:"N2"},jlpt_n1:{name:"JLPT N1",icon:"N1"},custom:{name:"Custom",icon:"自",pic:"pencil"}};
+const APP_VERSION='2026-11-10.1';
 const CAT_ORDER=Object.keys(CATEGORIES);
 // Combos sit outside the default selection: with nothing picked, a quiz covers every other category.
 const OPT_IN_CATS=['hiragana_combo','katakana_combo'];
@@ -350,7 +354,25 @@ const OPT_IN_CATS=['hiragana_combo','katakana_combo'];
 const MERGED_IDS={'ve-938':'ve-410'};
 
 // ============ ICONS ============
+// Category icons are Tabler Icons (MIT licence, tabler.io/icons).
 const ICONS={
+  'abacus':'<path d="M5 3v18"/><path d="M19 21v-18"/><path d="M5 7h14"/><path d="M5 15h14"/><path d="M8 13v4"/><path d="M11 13v4"/><path d="M16 13v4"/><path d="M14 5v4"/><path d="M11 5v4"/><path d="M8 5v4"/><path d="M3 21h18"/>',
+  'bed':'<path d="M5 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M22 17v-3h-20"/><path d="M2 8v9"/><path d="M12 14h10v-2a3 3 0 0 0 -3 -3h-7v5"/>',
+  'bowl-chopsticks':'<path d="M4 11h16a1 1 0 0 1 1 1v.5c0 1.5 -2.517 5.573 -4 6.5v1a1 1 0 0 1 -1 1h-8a1 1 0 0 1 -1 -1v-1c-1.687 -1.054 -4 -5 -4 -6.5v-.5a1 1 0 0 1 1 -1"/><path d="M19 7l-14 1"/><path d="M19 2l-14 3"/>',
+  'clock':'<path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0"/><path d="M12 7v5l3 3"/>',
+  'compass':'<path d="M8 16l2 -6l6 -2l-2 6l-6 2"/><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M12 3l0 2"/><path d="M12 19l0 2"/><path d="M3 12l2 0"/><path d="M19 12l2 0"/>',
+  'first-aid-kit':'<path d="M8 8v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"/><path d="M4 10a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2l0 -8"/><path d="M10 14h4"/><path d="M12 12v4"/>',
+  'flame':'<path d="M12 10.941c2.333 -3.308 .167 -7.823 -1 -8.941c0 3.395 -2.235 5.299 -3.667 6.706c-1.43 1.408 -2.333 3.294 -2.333 5.588c0 3.704 3.134 6.706 7 6.706c3.866 0 7 -3.002 7 -6.706c0 -1.712 -1.232 -4.403 -2.333 -5.588c-2.084 3.353 -3.257 3.353 -4.667 2.235"/>',
+  'hand-stop':'<path d="M8 13v-7.5a1.5 1.5 0 0 1 3 0v6.5"/><path d="M11 5.5v-2a1.5 1.5 0 1 1 3 0v8.5"/><path d="M14 5.5a1.5 1.5 0 0 1 3 0v6.5"/><path d="M17 7.5a1.5 1.5 0 0 1 3 0v8.5a6 6 0 0 1 -6 6h-2h.208a6 6 0 0 1 -5.012 -2.7a69.74 69.74 0 0 1 -.196 -.3c-.312 -.479 -1.407 -2.388 -3.286 -5.728a1.5 1.5 0 0 1 .536 -2.022a1.867 1.867 0 0 1 2.28 .28l1.47 1.47"/>',
+  'messages':'<path d="M21 14l-3 -3h-7a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1h9a1 1 0 0 1 1 1v10"/><path d="M14 15v2a1 1 0 0 1 -1 1h-7l-3 3v-10a1 1 0 0 1 1 -1h2"/>',
+  'pencil':'<path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4"/><path d="M13.5 6.5l4 4"/>',
+  'run':'<path d="M11.007 5a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M4 17l5 1l.75 -1.5"/><path d="M15 21v-4l-4 -3l1 -6"/><path d="M7 12v-3l5 -1l3 3l3 1"/>',
+  'shopping-bag':'<path d="M6.331 8h11.339a2 2 0 0 1 1.977 2.304l-1.255 8.152a3 3 0 0 1 -2.966 2.544h-6.852a3 3 0 0 1 -2.965 -2.544l-1.255 -8.152a2 2 0 0 1 1.977 -2.304"/><path d="M9 11v-5a3 3 0 0 1 6 0v5"/>',
+  'sparkles':'<path d="M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2m0 -12a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2m-7 12a6 6 0 0 1 6 -6a6 6 0 0 1 -6 -6a6 6 0 0 1 -6 6a6 6 0 0 1 6 6"/>',
+  'tools-kitchen-2':'<path d="M19 3v12h-5c-.023 -3.681 .184 -7.406 5 -12m0 12v6h-1v-3m-10 -14v17m-3 -17v3a3 3 0 1 0 6 0v-3"/>',
+  'torii':'<path d="M4 4c5.333 1.333 10.667 1.333 16 0"/><path d="M4 8h16"/><path d="M12 5v3"/><path d="M18 4.5v15.5"/><path d="M6 4.5v15.5"/>',
+  'train':'<path d="M21 13c0 -3.87 -3.37 -7 -10 -7h-8"/><path d="M3 15h16a2 2 0 0 0 2 -2"/><path d="M3 6v5h17.5"/><path d="M3 11v4"/><path d="M8 11v-5"/><path d="M13 11v-4.5"/><path d="M3 19h18"/>',
+  'users':'<path d="M5 7a4 4 0 1 0 8 0a4 4 0 1 0 -8 0"/><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0 -3 -3.85"/>',
   back:'<path d="M15 18l-6-6 6-6"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
   chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
@@ -367,6 +389,7 @@ const ICONS={
   timer:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/>'
 };
 function ico(n,fill){return '<svg viewBox="0 0 24 24" fill="'+(fill?'currentColor':'none')+'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ICONS[n]||'')+'</svg>'}
+function catGlyph(info){return info.pic?ico(info.pic):info.icon}
 function hydrateIcons(root){(root||document).querySelectorAll('[data-ico]').forEach(el=>{el.innerHTML=ico(el.dataset.ico)+(el.dataset.label?'<span>'+el.dataset.label+'</span>':'');el.removeAttribute('data-ico')})}
 // Tap-again confirm, as in Axiom: first tap arms the button, a second within 3 s acts.
 function tapAgain(btn,label,fn){
@@ -621,12 +644,12 @@ const VOCAB_DATA=[
 {"id":"nu-169","cat":"numbers","japanese":"一","furigana":"いち","english":["one","1"]},
 {"id":"nu-170","cat":"numbers","japanese":"二","furigana":"に","english":["two","2"]},
 {"id":"nu-171","cat":"numbers","japanese":"三","furigana":"さん","english":["three","3"]},
-{"id":"nu-172","cat":"numbers","japanese":"四","furigana":"よん","english":["four","4"]},
+{"id":"nu-172","cat":"numbers","japanese":"四","furigana":"よん","english":["four","4"],"alt":["し"]},
 {"id":"nu-173","cat":"numbers","japanese":"五","furigana":"ご","english":["five","5"]},
 {"id":"nu-174","cat":"numbers","japanese":"六","furigana":"ろく","english":["six","6"]},
-{"id":"nu-175","cat":"numbers","japanese":"七","furigana":"なな","english":["seven","7"]},
+{"id":"nu-175","cat":"numbers","japanese":"七","furigana":"なな","english":["seven","7"],"alt":["しち"]},
 {"id":"nu-176","cat":"numbers","japanese":"八","furigana":"はち","english":["eight","8"]},
-{"id":"nu-177","cat":"numbers","japanese":"九","furigana":"きゅう","english":["nine","9"]},
+{"id":"nu-177","cat":"numbers","japanese":"九","furigana":"きゅう","english":["nine","9"],"alt":["く"]},
 {"id":"nu-178","cat":"numbers","japanese":"十","furigana":"じゅう","english":["ten","10"]},
 {"id":"nu-179","cat":"numbers","japanese":"百","furigana":"ひゃく","english":["hundred","100"]},
 {"id":"nu-180","cat":"numbers","japanese":"千","furigana":"せん","english":["thousand","1000"]},
@@ -781,10 +804,10 @@ const VOCAB_DATA=[
 {"id":"si-329","cat":"sightseeing","japanese":"体験","furigana":"たいけん","english":["experience"]},
 {"id":"si-330","cat":"sightseeing","japanese":"有名","furigana":"ゆうめい","english":["famous","well-known"]},
 {"id":"ti-331","cat":"time","japanese":"今日","furigana":"きょう","english":["today"]},
-{"id":"ti-332","cat":"time","japanese":"明日","furigana":"あした","english":["tomorrow"]},
+{"id":"ti-332","cat":"time","japanese":"明日","furigana":"あした","english":["tomorrow"],"alt":["あす"]},
 {"id":"ti-333","cat":"time","japanese":"昨日","furigana":"きのう","english":["yesterday"]},
 {"id":"ti-334","cat":"time","japanese":"朝","furigana":"あさ","english":["morning"]},
-{"id":"ti-335","cat":"time","japanese":"昼","furigana":"ひる","english":["noon","afternoon","daytime"]},
+{"id":"ti-335","cat":"time","japanese":"昼","furigana":"ひる","english":["noon","midday","daytime"]},
 {"id":"ti-336","cat":"time","japanese":"夜","furigana":"よる","english":["night","evening"]},
 {"id":"ti-337","cat":"time","japanese":"今","furigana":"いま","english":["now"]},
 {"id":"ti-338","cat":"time","japanese":"後で","furigana":"あとで","english":["later"]},
@@ -806,7 +829,7 @@ const VOCAB_DATA=[
 {"id":"pe-354","cat":"people","japanese":"男の人","furigana":"おとこのひと","english":["man"]},
 {"id":"pe-355","cat":"people","japanese":"女の人","furigana":"おんなのひと","english":["woman"]},
 {"id":"pe-356","cat":"people","japanese":"名前","furigana":"なまえ","english":["name"]},
-{"id":"pe-357","cat":"people","japanese":"私","furigana":"わたし","english":["I","me"]},
+{"id":"pe-357","cat":"people","japanese":"私","furigana":"わたし","english":["I","me"],"alt":["わたくし"]},
 {"id":"pe-358","cat":"people","japanese":"あなた","furigana":"","english":["you"]},
 {"id":"ad-359","cat":"adjectives","japanese":"大きい","furigana":"おおきい","english":["big","large"]},
 {"id":"ad-360","cat":"adjectives","japanese":"小さい","furigana":"ちいさい","english":["small","little"]},
@@ -904,7 +927,7 @@ const VOCAB_DATA=[
 {"id":"co-452","cat":"conversation","japanese":"あなたはきれい","furigana":"","english":["you're pretty","you are pretty","you're beautiful","you are beautiful"]},
 {"id":"co-453","cat":"conversation","japanese":"何をしていますか","furigana":"なにをしていますか","english":["what are you doing"]},
 {"id":"co-454","cat":"conversation","japanese":"どんな仕事をしていますか","furigana":"どんなしごとをしていますか","english":["what type of work do you do","what do you do for work"],"example":"Answer: エンジニアです = I'm an engineer"},
-{"id":"co-455","cat":"conversation","japanese":"趣味がありますか","furigana":"しゅみがありますか","english":["do you have any hobbies","do you have hobbies"],"example":"Answer: 音楽が好きです = I like music"},
+{"id":"co-455","cat":"conversation","japanese":"趣味はありますか","furigana":"しゅみはありますか","english":["do you have any hobbies","do you have hobbies"],"example":"Answer: 音楽が好きです = I like music"},
 {"id":"co-456","cat":"conversation","japanese":"一緒","furigana":"いっしょ","english":["together"]},
 {"id":"co-457","cat":"conversation","japanese":"会話","furigana":"かいわ","english":["conversation","talk","chat"]},
 {"id":"co-458","cat":"conversation","japanese":"言葉","furigana":"ことば","english":["word","phrase","expression"]},
@@ -1053,7 +1076,7 @@ const VOCAB_DATA=[
 {"id":"n5-1059","cat":"jlpt_n4","japanese":"彼","furigana":"かれ","pos":"n","english":["he","him","boyfriend"]},
 {"id":"n5-1060","cat":"jlpt_n4","japanese":"彼女","furigana":"かのじょ","pos":"n","english":["she","her","girlfriend"]},
 {"id":"n5-1061","cat":"jlpt_n5","japanese":"皆さん","furigana":"みなさん","pos":"adv","english":["everyone","everybody"]},
-{"id":"n5-1062","cat":"jlpt_n5","japanese":"家","furigana":"いえ","pos":"n","english":["house","home"]},
+{"id":"n5-1062","cat":"jlpt_n5","japanese":"家","furigana":"いえ","pos":"n","english":["house","home"],"alt":["うち"]},
 {"id":"n5-1063","cat":"jlpt_n5","japanese":"教室","furigana":"きょうしつ","pos":"n","english":["classroom"]},
 {"id":"n5-1064","cat":"jlpt_n5","japanese":"図書館","furigana":"としょかん","pos":"n","english":["library"]},
 {"id":"n5-1065","cat":"jlpt_n5","japanese":"銀行","furigana":"ぎんこう","pos":"n","english":["bank"]},
@@ -1113,7 +1136,7 @@ const VOCAB_DATA=[
 {"id":"n5-1119","cat":"jlpt_n5","japanese":"習う","furigana":"ならう","pos":"v","vg":1,"english":["to learn","learn"]},
 {"id":"n5-1120","cat":"jlpt_n5","japanese":"並ぶ","furigana":"ならぶ","pos":"v","vg":1,"english":["to line up","queue"]},
 {"id":"n5-1121","cat":"jlpt_n5","japanese":"置く","furigana":"おく","pos":"v","vg":1,"english":["to put","place","set"]},
-{"id":"n5-1122","cat":"jlpt_n5","japanese":"嬉しい","furigana":"うれしい","pos":"i-adj","english":["happy","glad"]},
+{"id":"n5-1122","cat":"jlpt_n4","japanese":"嬉しい","furigana":"うれしい","pos":"i-adj","english":["happy","glad"]},
 {"id":"n5-1123","cat":"jlpt_n4","japanese":"悲しい","furigana":"かなしい","pos":"i-adj","english":["sad"]},
 {"id":"n5-1124","cat":"jlpt_n4","japanese":"怖い","furigana":"こわい","pos":"i-adj","english":["scary","afraid"]},
 {"id":"n5-1125","cat":"jlpt_n4","japanese":"眠い","furigana":"ねむい","pos":"i-adj","english":["sleepy"]},
@@ -1152,7 +1175,7 @@ const VOCAB_DATA=[
 {"id":"n5-1158","cat":"jlpt_n5","japanese":"匹","furigana":"ひき","pos":"ctr","english":["counter for small animals"]},
 {"id":"n5-1159","cat":"jlpt_n5","japanese":"台","furigana":"だい","pos":"ctr","english":["counter for machines"]},
 {"id":"n5-1160","cat":"jlpt_n5","japanese":"冊","furigana":"さつ","pos":"ctr","english":["counter for books"]},
-{"id":"n5-1161","cat":"jlpt_n1","japanese":"杯","furigana":"はい","pos":"ctr","english":["counter for cups","counter for glasses"]},
+{"id":"n5-1161","cat":"jlpt_n5","japanese":"杯","furigana":"はい","pos":"ctr","english":["counter for cups","counter for glasses"]},
 {"id":"n4-2000","cat":"jlpt_n4","japanese":"経済","furigana":"けいざい","pos":"n","english":["economy","economics"]},
 {"id":"n4-2001","cat":"jlpt_n4","japanese":"政治","furigana":"せいじ","pos":"n","english":["politics","government"]},
 {"id":"n4-2002","cat":"jlpt_n4","japanese":"社会","furigana":"しゃかい","pos":"n","english":["society"]},
@@ -1223,7 +1246,7 @@ const VOCAB_DATA=[
 {"id":"n4-2067","cat":"jlpt_n4","japanese":"落ちる","furigana":"おちる","pos":"v","vg":2,"english":["to fall","drop"]},
 {"id":"n4-2068","cat":"jlpt_n4","japanese":"倒れる","furigana":"たおれる","pos":"v","vg":2,"english":["to fall down","collapse"]},
 {"id":"n4-2069","cat":"jlpt_n4","japanese":"増える","furigana":"ふえる","pos":"v","vg":2,"english":["to increase"]},
-{"id":"n4-2070","cat":"jlpt_n3","japanese":"減る","furigana":"へる","pos":"v","vg":1,"english":["to decrease","reduce"]},
+{"id":"n4-2070","cat":"jlpt_n3","japanese":"減る","furigana":"へる","pos":"v","vg":1,"english":["to decrease","go down"]},
 {"id":"n4-2071","cat":"jlpt_n4","japanese":"決める","furigana":"きめる","pos":"v","vg":2,"english":["to decide","determine"]},
 {"id":"n4-2072","cat":"jlpt_n4","japanese":"選ぶ","furigana":"えらぶ","pos":"v","vg":1,"english":["to choose","select"]},
 {"id":"n4-2073","cat":"jlpt_n4","japanese":"驚く","furigana":"おどろく","pos":"v","vg":1,"english":["to be surprised","surprised"]},
@@ -1272,7 +1295,7 @@ const VOCAB_DATA=[
 {"id":"n4-2116","cat":"jlpt_n4","japanese":"例えば","furigana":"たとえば","pos":"expr","english":["for example"]},
 {"id":"n3-3000","cat":"jlpt_n4","japanese":"会議","furigana":"かいぎ","english":["meeting","conference"]},
 {"id":"n3-3001","cat":"jlpt_n3","japanese":"報告","furigana":"ほうこく","english":["report"]},
-{"id":"n3-3002","cat":"jlpt_n3","japanese":"締め切り","furigana":"しめきり","english":["deadline"]},
+{"id":"n3-3002","cat":"jlpt_n2","japanese":"締め切り","furigana":"しめきり","english":["deadline"]},
 {"id":"n3-3003","cat":"jlpt_n3","japanese":"担当","furigana":"たんとう","english":["in charge","responsible"]},
 {"id":"n3-3004","cat":"jlpt_n1","japanese":"部門","furigana":"ぶもん","english":["department","division"]},
 {"id":"n3-3005","cat":"jlpt_n3","japanese":"上司","furigana":"じょうし","english":["boss","superior"]},
@@ -1391,7 +1414,7 @@ const VOCAB_DATA=[
 {"id":"n3-3118","cat":"jlpt_n3","japanese":"効率的","furigana":"こうりつてき","english":["efficient"]},
 {"id":"n3-3119","cat":"jlpt_n3","japanese":"基本的","furigana":"きほんてき","english":["basic","fundamental"]},
 {"id":"n3-3120","cat":"jlpt_n4","japanese":"残念","furigana":"ざんねん","english":["unfortunate","disappointing"]},
-{"id":"n3-3121","cat":"jlpt_n3","japanese":"幸運","furigana":"こううん","english":["lucky","fortunate"]},
+{"id":"n3-3121","cat":"jlpt_n3","japanese":"幸運","furigana":"こううん","english":["good luck","good fortune","lucky"]},
 {"id":"n3-3122","cat":"jlpt_n3","japanese":"得意","furigana":"とくい","english":["good at","strong point"]},
 {"id":"n3-3123","cat":"jlpt_n3","japanese":"苦手","furigana":"にがて","english":["bad at","weak point"]},
 {"id":"n3-3124","cat":"jlpt_n3","japanese":"実は","furigana":"じつは","english":["actually","in fact"]},
@@ -1410,7 +1433,7 @@ const VOCAB_DATA=[
 {"id":"n3-3137","cat":"jlpt_n2","japanese":"仕方がない","furigana":"しかたがない","english":["it can't be helped","no choice"]},
 {"id":"n2-4000","cat":"jlpt_n1","japanese":"政策","furigana":"せいさく","english":["policy"]},
 {"id":"n2-4001","cat":"jlpt_n3","japanese":"選挙","furigana":"せんきょ","english":["election"]},
-{"id":"n2-4002","cat":"jlpt_n3","japanese":"議員","furigana":"ぎいん","english":["member of parliament","politician"]},
+{"id":"n2-4002","cat":"jlpt_n3","japanese":"議員","furigana":"ぎいん","english":["member of parliament","assembly member","legislator"]},
 {"id":"n2-4003","cat":"jlpt_n3","japanese":"首相","furigana":"しゅしょう","english":["prime minister"]},
 {"id":"n2-4004","cat":"jlpt_n3","japanese":"大統領","furigana":"だいとうりょう","english":["president"]},
 {"id":"n2-4005","cat":"jlpt_n3","japanese":"外交","furigana":"がいこう","english":["diplomacy"]},
@@ -1423,7 +1446,7 @@ const VOCAB_DATA=[
 {"id":"n2-4012","cat":"jlpt_n1","japanese":"投資","furigana":"とうし","english":["investment"]},
 {"id":"n2-4013","cat":"jlpt_n3","japanese":"株","furigana":"かぶ","english":["stock","shares"]},
 {"id":"n2-4014","cat":"jlpt_n3","japanese":"犯罪","furigana":"はんざい","english":["crime"]},
-{"id":"n2-4015","cat":"jlpt_n3","japanese":"裁判","furigana":"さいばん","english":["trial","court"]},
+{"id":"n2-4015","cat":"jlpt_n3","japanese":"裁判","furigana":"さいばん","english":["trial","court case"]},
 {"id":"n2-4016","cat":"jlpt_n2","japanese":"弁護士","furigana":"べんごし","english":["lawyer","attorney"]},
 {"id":"n2-4017","cat":"jlpt_n2","japanese":"容疑者","furigana":"ようぎしゃ","english":["suspect"]},
 {"id":"n2-4018","cat":"jlpt_n2","japanese":"被告","furigana":"ひこく","english":["defendant"]},
@@ -1526,7 +1549,7 @@ const VOCAB_DATA=[
 {"id":"n1-5007","cat":"jlpt_n1","japanese":"反論","furigana":"はんろん","english":["counter-argument","rebuttal"]},
 {"id":"n1-5008","cat":"jlpt_n1","japanese":"裏付け","furigana":"うらづけ","english":["backing","evidence","support"]},
 {"id":"n1-5009","cat":"jlpt_n2","japanese":"妥当","furigana":"だとう","english":["valid","reasonable"]},
-{"id":"n1-5010","cat":"jlpt_n4","japanese":"是非","furigana":"ぜひ","english":["right and wrong","by all means"]},
+{"id":"n1-5010","cat":"jlpt_n4","japanese":"是非","furigana":"ぜひ","english":["by all means","definitely","right and wrong"]},
 {"id":"n1-5011","cat":"jlpt_n2","japanese":"功績","furigana":"こうせき","english":["achievement","merit"]},
 {"id":"n1-5012","cat":"jlpt_n1","japanese":"弊害","furigana":"へいがい","english":["harmful effect","evil"]},
 {"id":"n1-5013","cat":"jlpt_n1","japanese":"懸念","furigana":"けねん","english":["concern","apprehension"]},
@@ -1695,7 +1718,10 @@ let sessionLimit=0; // 0=full
 let timedMode=false,timerInterval=null,timerLeft=0;
 let quizStartTime=0;
 const TIMER_SECS=10;
-const SRS_INTERVALS=[1,3,7,14,30,90]; // days per level
+const STAR_DAYS=[1,2,3,5,8,13,21,34,55]; // days until the next review after reaching star 1 to 9
+const MASTERED_GROWTH=1.6,MAX_REVIEW_DAYS=365; // a Mastered word's gap keeps stretching, up to a year
+const CHOICE_STAR_CAP=5; // Choice mode (recognition) earns stars up to the top of Familiar only
+const OLD_SRS_INTERVALS=[1,3,7,14,30,90]; // schedule before 2026-11-10; read only to convert saved progress
 
 const STORAGE={
   progress:"jp-beg2-progress",custom:"jp-beg2-custom",
@@ -1712,6 +1738,7 @@ function saveLifetimeStats(s){localStorage.setItem(STORAGE.lifetimeStats,JSON.st
 function recordCorrect(){const s=getLifetimeStats();s.correct++;saveLifetimeStats(s);logActivity('correct')}
 function recordIncorrect(){const s=getLifetimeStats();s.incorrect++;saveLifetimeStats(s);logActivity('incorrect')}
 function logActivity(type){
+  updateStreak();
   try{
     const log=JSON.parse(localStorage.getItem(STORAGE.activityLog)||'{}');
     const d=today();
@@ -1735,6 +1762,7 @@ function loadStorage(){
   try{wordOverrides=JSON.parse(localStorage.getItem(STORAGE.overrides)||"{}")}catch{wordOverrides={}}
   loadFavourites();
   migrateMerged();
+  migrateSchedule();
 }
 // Carry progress, review schedule and list entries from merged duplicate ids to the kept entry.
 function migrateMerged(){
@@ -1749,8 +1777,9 @@ function migrateMerged(){
   if(changed)saveProgress();
 }
 function saveProgress(){localStorage.setItem(STORAGE.progress,JSON.stringify(progress))}
-function saveCustom(){localStorage.setItem(STORAGE.custom,JSON.stringify(customWords))}
-function saveOverrides(){localStorage.setItem(STORAGE.overrides,JSON.stringify(wordOverrides))}
+function setProg(id,stars,wrongCount){progress[id]={stars,wrongCount,seen:Date.now()};saveProgress()}
+function saveCustom(){_glossCache=null;localStorage.setItem(STORAGE.custom,JSON.stringify(customWords))}
+function saveOverrides(){_glossCache=null;localStorage.setItem(STORAGE.overrides,JSON.stringify(wordOverrides))}
 
 // ============ FAVOURITES/LISTS ============
 let favLists=[];
@@ -1849,34 +1878,44 @@ const CONJ_LABELS={masu:'ます form',te:'て form',ta:'た form',nai:'ない fo
 let conjDifficulty='normal';
 const VG_NAMES={1:'Godan',2:'Ichidan',3:'Irregular'};
 let _lastGain=false; // the last answer earned a star
+let _lastNote=''; // line under the verdict: what the answer did to the review day
 
-// ============ SRS ============
+// ============ REVIEW SCHEDULE ============
+// Every word with a star has a review day: {nextReview: ms at local midnight, ivl: days}.
+// A star is earned by one right answer on or after that day; a new word earns its first star in-session.
 let _srsCache=null;
 function _loadSRS(){if(!_srsCache)try{_srsCache=JSON.parse(localStorage.getItem(STORAGE.srs)||"{}")}catch{_srsCache={}}return _srsCache}
 function _saveSRS(){localStorage.setItem(STORAGE.srs,JSON.stringify(_srsCache||{}))}
-function getSRS(id){const d=_loadSRS();return d[id]||{level:0,nextReview:0}}
+function getSRS(id){const d=_loadSRS();return d[id]||{nextReview:0,ivl:0}}
 function saveSRS(id,data){const d=_loadSRS();d[id]=data;_saveSRS()}
 function resetSRSStorage(){_srsCache={};_saveSRS()}
-function isDueForReview(id){const s=getSRS(id);return s.nextReview>0&&s.nextReview<=Date.now()}
-function advanceSRS(id){
-  const s=getSRS(id);const nextLevel=Math.min(s.level+1,SRS_INTERVALS.length-1);
-  const ease=s.ease||1.0;
-  const newEase=Math.min(ease+0.15,2.5);
-  const interval=Math.round(SRS_INTERVALS[nextLevel]*newEase);
-  const nextReview=Date.now()+(interval*24*60*60*1000);
-  saveSRS(id,{level:nextLevel,nextReview,ease:newEase});
+function dayStart(offset){const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate()+(offset||0)).getTime()}
+function isDueForReview(id){return getStars(id)>=1&&(getSRS(id).nextReview||0)<=Date.now()}
+function scheduleReview(id,days){saveSRS(id,{nextReview:dayStart(days),ivl:days})}
+function scheduleForStar(id,stars){scheduleReview(id,STAR_DAYS[Math.max(1,Math.min(9,stars))-1])}
+function stretchMastered(id){
+  const cur=Math.max(1,getSRS(id).ivl||STAR_DAYS[8]);
+  const next=cur<STAR_DAYS[8]?Math.min(STAR_DAYS[8],Math.round(cur*2.5)):Math.round(cur*MASTERED_GROWTH);
+  scheduleReview(id,Math.min(MAX_REVIEW_DAYS,next));
 }
-function failSRS(id){
-  const s=getSRS(id);
-  const ease=Math.max((s.ease||1.0)-0.3,0.5);
-  saveSRS(id,{level:0,nextReview:Date.now()+(60*60*1000),ease});
-}
-function getDueWords(){return getAllWords().filter(w=>getStars(w.id)>=9&&isDueForReview(w.id))}
-function getReviewSchedule(id){
-  const s=getSRS(id);const now=Date.now();
-  if(s.nextReview<=now)return"Due now";
-  const diff=s.nextReview-now;const days=Math.ceil(diff/(24*60*60*1000));
-  if(days===1)return"Due tomorrow";return"Due in "+days+" days";
+function getDueWords(){return getAllWords().filter(w=>isDueForReview(w.id))}
+function sortDue(list){return list.sort((a,b)=>((getSRS(a.id).nextReview||0)-(getSRS(b.id).nextReview||0))||(getStars(a.id)-getStars(b.id)))}
+function daysUntilReview(id){return Math.round(((getSRS(id).nextReview||0)-dayStart(0))/86400000)}
+function getReviewSchedule(id){const d=daysUntilReview(id);return d<=0?'Due now':d===1?'Due tomorrow':'Due in '+d+' days'}
+function nextReviewText(id){const d=daysUntilReview(id);return d<=0?'today':d===1?'tomorrow':'in '+d+' days'}
+// Progress saved before every star had a review day: starred words become due today;
+// Mastered words keep the date they already had.
+function migrateSchedule(){
+  const srs=_loadSRS();let changed=false;
+  Object.keys(progress).forEach(id=>{
+    const stars=(progress[id]&&progress[id].stars)||0;const e=srs[id];
+    if(stars<1){if(e){delete srs[id];changed=true}return}
+    if(e&&typeof e.ivl==='number')return;
+    if(stars>=9&&e&&e.nextReview>0)srs[id]={nextReview:e.nextReview,ivl:Math.max(3,Math.round(OLD_SRS_INTERVALS[Math.min(e.level||1,5)]*(e.ease||1)))};
+    else srs[id]={nextReview:dayStart(0),ivl:STAR_DAYS[Math.min(stars,9)-1]};
+    changed=true;
+  });
+  if(changed)_saveSRS();
 }
 
 // ============ STREAK ============
@@ -1933,26 +1972,31 @@ function getTier(totalStars){return totalStars<3?0:totalStars<6?1:2}
 function isMastered(totalStars){return totalStars>=9}
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]}return r}
 function matchAnswer(inp,ans){
-  const clean=s=>s.replace(/[ ​‌‍﻿          　]/g,' ').trim().toLowerCase().replace(/\s+/g,' ').replace(/[''`.,!?;:。、！？]+$/,'');
+  const clean=s=>s.replace(/[ ​‌‍﻿          　]/g,' ').trim().toLowerCase().replace(/[ァ-ヶ]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0x60)).replace(/\s+/g,' ').replace(/[''`.,!?;:。、！？]+$/,'');
   const normalize=s=>{let c=clean(s);c=c.replace(/^to\s+/,'').replace(/^the\s+/,'').replace(/^a\s+/,'');return c};
   const latin=s=>/^[\x00-\x7f]*$/.test(s);
   const c=clean(inp);
   const cn=normalize(inp);
+  const known=glossSet();
   return ans.some(a=>{
     const ac=clean(a);const an=normalize(a);
     if(ac===c)return true;
     if(an===cn&&cn.length>0)return true;
     // One-letter typo allowed for English and romaji only. In Japanese one kana is the whole answer (かいて vs かいで).
     if(!latin(ac))return false;
+    // A near miss that is itself another word's meaning is a different answer, not a typo (here/there, right/eight).
+    if(known.has(c)||known.has(cn))return false;
     if(ac.length>=4&&c.length>=3&&Math.abs(ac.length-c.length)<=1&&levenshtein(ac,c)<=1)return true;
     if(an.length>=4&&cn.length>=3&&Math.abs(an.length-cn.length)<=1&&levenshtein(an,cn)<=1)return true;
     return false;
   });
 }
-// English to Japanese: every word that lists the prompt as a meaning is a right answer
-// (the prompt "good morning" fits both おはよう and おはようございます).
-// English to Japanese: every word that lists the prompt as a meaning is a right answer
-// (the prompt "good morning" fits both おはよう and おはようございます).
+let _glossCache=null;
+function glossSet(){
+  if(!_glossCache){_glossCache=new Set();const k=x=>x.trim().toLowerCase().replace(/\s+/g,' ');
+    getAllWords().forEach(w=>w.english.forEach(e=>{const g=k(e);_glossCache.add(g);_glossCache.add(g.replace(/^(to|the|a)\s+/,''))}))}
+  return _glossCache;
+}
 function levenshtein(a,b){
   const m=a.length,n=b.length;if(m===0)return n;if(n===0)return m;
   let prev=Array.from({length:n+1},(_,i)=>i);
@@ -2008,9 +2052,9 @@ function renderMenu(){
   const cats=getActiveCats();let grid='';
   const tile=(id,glyph,name,words)=>{
     const m=words.filter(w=>getStars(w.id)>=9).length;const sel=selectedCats.has(id);
-    return '<button class="tile" aria-pressed="'+sel+'" onclick="toggleCat(\''+id+'\')" title="'+name+'"><span class="top"><span class="gl">'+glyph+'</span><span class="ct">'+m+'/'+words.length+'</span></span><span class="nm">'+name+'</span><span class="minibar"><i style="width:'+(words.length?m/words.length*100:0)+'%"></i></span></button>';
+    return '<button class="tile" aria-pressed="'+sel+'" onclick="toggleCat(\''+id+'\')" title="'+name+'"><span class="top"><span class="gl'+(glyph.startsWith('<svg')?' pic':'')+'">'+glyph+'</span><span class="ct">'+m+'/'+words.length+'</span></span><span class="nm">'+name+'</span><span class="minibar"><i style="width:'+(words.length?m/words.length*100:0)+'%"></i></span></button>';
   };
-  cats.forEach(c=>{const info=CATEGORIES[c]||{name:c,icon:'?'};grid+=tile(c,info.icon,info.name,all.filter(w=>w.cat===c))});
+  cats.forEach(c=>{const info=CATEGORIES[c]||{name:c,icon:'?'};grid+=tile(c,catGlyph(info),info.name,all.filter(w=>w.cat===c))});
   favLists.forEach((l,i)=>{if(l.ids.length===0)return;grid+=tile('fav-'+i,ico('heart',true),escapeHTML(l.name),all.filter(w=>l.ids.includes(w.id)))});
   document.getElementById('cat-grid').innerHTML=grid;
   const activeCount=getActiveWords().length;
@@ -2067,29 +2111,28 @@ function launchQuiz(){
 
 // ============ QUIZ ============
 function startQuiz(){
-  let pool;
+  let sorted;
   const activeWords=getActiveWords();
+  const isDue=w=>isDueForReview(w.id);
   if(quizMode==='conjugation'){
-    const verbPool=activeWords.filter(w=>w.vg);
-    if(verbPool.length===0){notice('No verbs here','Pick a category with verbs, such as Verbs or a JLPT level.');return}
-    pool=verbPool;
-  } else if(sessionLimit===-1){{const ids=new Set(activeWords.map(w=>w.id));pool=getDueWords().filter(w=>ids.has(w.id))}if(pool.length===0){notice('Nothing due for review');return}}
-  else if(sessionLimit===-2){{const ids=selectionIds();pool=getDifficultWords().filter(w=>ids.has(w.id))}if(pool.length===0){notice('No difficult words yet','A word lands here after 3 wrong answers.');return}}
-  else{const needWork=activeWords.filter(w=>getStars(w.id)<9);pool=needWork.length>0?needWork:activeWords}
-
-  const grouped={};
-  pool.forEach(w=>{
-    const s=getStars(w.id);
-    const key=s===0&&getWrongCount(w.id)===0?'new':String(s);
-    if(!grouped[key])grouped[key]=[];
-    grouped[key].push(w);
-  });
-  const order=['new','0','1','2','3','4','5','6','7','8','9'];
-  const sorted=[];
-  order.forEach(k=>{if(grouped[k])sorted.push(...shuffle(grouped[k]))});
-
-  const initialPool=(sessionLimit>0)?sorted.slice(0,sessionLimit):
-                    (sessionLimit===-3)?shuffle([...sorted]):sorted;
+    sorted=shuffle(activeWords.filter(w=>w.vg));
+    if(sorted.length===0){notice('No verbs here','Pick a category with verbs, such as Verbs or a JLPT level.');return}
+  } else if(sessionLimit===-1){
+    sorted=sortDue(activeWords.filter(isDue));
+    if(sorted.length===0){notice('Nothing due for review');return}
+  } else if(sessionLimit===-2){
+    sorted=shuffle(activeWords.filter(w=>getWrongCount(w.id)>=3));
+    if(sorted.length===0){notice('No difficult words yet','A word lands here after 3 wrong answers.');return}
+  } else {
+    // Due reviews first (longest overdue first), then words begun but not yet starred (longest unseen first),
+    // then new words. Words not due yet come last, as early practice that earns nothing.
+    const due=sortDue(activeWords.filter(isDue));
+    const begun=activeWords.filter(w=>getStars(w.id)===0&&(w.id in progress)).sort((x,y)=>(progress[x.id].seen||0)-(progress[y.id].seen||0));
+    const fresh=shuffle(activeWords.filter(w=>!(w.id in progress)));
+    const early=sortDue(activeWords.filter(w=>getStars(w.id)>=1&&!isDue(w)));
+    sorted=sessionLimit===-3?[...due,...shuffle([...begun,...fresh,...early])]:[...due,...begun,...fresh,...early];
+  }
+  const initialPool=sessionLimit>0?sorted.slice(0,sessionLimit):sorted;
 
   sessionBuckets={};
   initialPool.forEach(w=>{sessionBuckets[w.id]={bucket:0,lastSeen:-99}});
@@ -2098,7 +2141,6 @@ function startQuiz(){
   quizTotalUnique=new Set(initialPool.map(w=>w.id)).size;quizSeenIds=new Set();quizProgressMax=0;
   _previewedThisSession.clear();
   quizStartTime=Date.now();
-  updateStreak();
   showScreen('quiz');renderQuiz();
 }
 // Insert a word back into the queue after the appropriate gap for its bucket level
@@ -2130,15 +2172,58 @@ function startTimer(){
 
 function timeUp(){
   const w=quizQueue[quizIdx];
-  quizLastInput="(time up)";quizAnswered++;
-  quizFeedback='wrong';playTimerOut();currentStreak=0;recordIncorrect();
-  if(!sessionWrong.some(x=>x.id===w.id))sessionWrong.push(w);
-  const sb=sessionBuckets[w.id]||(sessionBuckets[w.id]={bucket:0,lastSeen:-99});
-  sb.bucket=0;
-  requeueWord(w);
-  const tuTier=Math.floor(getStars(w.id)/3)*3;progress[w.id]={stars:tuTier,wrongCount:(getWrongCount(w.id)+1)};saveProgress();
-  failSRS(w.id);
+  quizLastInput="(time up)";
+  gradeAnswer(w,false,true);
   speakJapanese(w.japanese,w.furigana);renderQuiz();
+}
+// One place decides what an answer does to the session count, the stars and the review day.
+function gradeAnswer(w,isCorrect,timedOut){
+  const practice=quizMode==='conjugation'; // conjugation drills never move stars or review days
+  const full=SESSION_GAPS.length;
+  const sb=sessionBuckets[w.id]||(sessionBuckets[w.id]={bucket:0,lastSeen:-99});
+  const stars=getStars(w.id),wc=getWrongCount(w.id),due=isDueForReview(w.id);
+  _lastGain=false;_lastNote='';quizAnswered++;_feedbackShownAt=Date.now();
+  if(!isCorrect){
+    quizFeedback='wrong';currentStreak=0;recordIncorrect();if(timedOut)playTimerOut();else playWrong();
+    if(!sessionWrong.some(x=>x.id===w.id))sessionWrong.push(w);
+    _justPreviewed.delete(w.id);
+    sb.bucket=0;sb.missed=true;requeueWord(w);
+    if(!practice){
+      // Back to the start of the current level; a Mastered word falls to Strong. Due again tomorrow.
+      const ns=stars>=9?6:Math.floor(stars/3)*3;
+      setProg(w.id,ns,wc+1);
+      if(ns>=1){scheduleReview(w.id,1);_lastNote=(ns<stars?'Back to '+levelName(ns).toLowerCase()+'. ':'')+'Due again tomorrow'}
+    }
+    return;
+  }
+  quizCorrect++;quizFeedback='correct';currentStreak++;recordCorrect();
+  const justPrev=_justPreviewed.has(w.id);if(justPrev)_justPreviewed.delete(w.id);
+  if(justPrev||quizShowHint){
+    // Right after the new-word card, or with the reading shown: no credit, and no star for this word this session.
+    if(quizShowHint){sb.missed=true;_lastNote='Reading shown, so this answer does not count'}
+    if(!practice)setProg(w.id,stars,wc);
+    requeueWord(w);playCorrect();return;
+  }
+  // New words, and words missed this session, need 3 spaced right answers; a review needs one.
+  const learning=practice||stars===0||sb.missed;
+  sb.bucket=learning?Math.min(sb.bucket+1,full):full;
+  if(sb.bucket<full){requeueWord(w);if(!practice)setProg(w.id,stars,wc);playCorrect();return}
+  let ns=stars;
+  if(!practice){
+    if(stars===0){ns=1;scheduleForStar(w.id,1);_lastNote='Next review '+nextReviewText(w.id)}
+    else if(sb.missed){_lastNote=isDueForReview(w.id)?'No star this time. It stays due':'Next review '+nextReviewText(w.id)}
+    else if(!due){_lastNote='Early practice. Next review '+nextReviewText(w.id)}
+    else if(quizMode==='choice'&&stars>=CHOICE_STAR_CAP){_lastNote='Choice stops at '+CHOICE_STAR_CAP+' stars. Type the answer to move this word on'}
+    else if(stars>=9){stretchMastered(w.id);_lastNote='Next review '+nextReviewText(w.id)}
+    else{ns=stars+1;scheduleForStar(w.id,ns);_lastNote='Next review '+nextReviewText(w.id)}
+    setProg(w.id,ns,ns>=9?0:wc);
+  }
+  _lastGain=ns>stars;
+  if(_lastGain&&(ns===9||ns===3||ns===6))playThreeStars();
+  else if(_lastGain&&ns===1)playOneStar();
+  else playCorrect();
+  // Endless: the word goes round again as practice
+  if(sessionLimit===-3){sb.bucket=0;sb.missed=false;quizQueue.push(w)}
 }
 
 function renderTimerBar(){
@@ -2215,12 +2300,12 @@ function renderQuiz(){
   quizHeader();
   const card=document.getElementById('quiz-card');
   const newStars=getStars(w.id);
-  const cardClass=quizFeedback==='correct'?(newStars>=9?' mastered':(newStars===3||newStars===6)?' tierup':' correct'):quizFeedback==='wrong'?' wrong':'';
+  const cardClass=quizFeedback==='correct'?(_lastGain&&newStars>=9?' mastered':_lastGain&&(newStars===3||newStars===6)?' tierup':' correct'):quizFeedback==='wrong'?' wrong':'';
   card.className='card qcard'+cardClass;
 
   const sb=sessionBuckets[w.id];
   const sessionDots=sb&&sb.bucket>0&&sb.bucket<SESSION_GAPS.length?'<span>'+sb.bucket+' of '+SESSION_GAPS.length+' this session</span>':'';
-  const srsInfo=stars>=9?'<span>'+getReviewSchedule(w.id)+'</span>':'';
+  const srsInfo=stars>=1?'<span>'+getReviewSchedule(w.id)+'</span>':'';
   document.getElementById('quiz-stars-area').innerHTML=starsHTML(stars)+sessionDots+srsInfo;
 
   const catInfo=CATEGORIES[w.cat]||{name:w.cat};
@@ -2265,6 +2350,7 @@ function renderQuiz(){
   const wc=getWrongCount(w.id);
   const wrongSuffix=wc>0?'<div class="typed">Wrong '+wc+' time'+(wc>1?'s':'')+' in total</div>':'';
   const jpLine=quizMode==='reverse'?'<div class="ans jp">'+escapeHTML(w.japanese)+(w.furigana?' ('+escapeHTML(w.furigana)+')':'')+'</div>':'';
+  const noteLine=_lastNote?'<div class="typed">'+escapeHTML(_lastNote)+'</div>':'';
   const conjLine=()=>'<div class="ans jp"><b>'+conjAnswers(w,w._conjForm).map(escapeHTML).join(' / ')+'</b></div>';
   if(quizFeedback==='correct'){
     const ns=getStars(w.id);
@@ -2273,12 +2359,12 @@ function renderQuiz(){
       :'<div class="verdict good">Correct</div>';
     if(quizMode==='conjugation')h+=conjLine();
     else if(w.english.length>1)h+='<div class="ans">'+escapeHTML(w.english.join(', '))+'</div>';
-    h+=jpLine+exampleHTML(w);fbArea.innerHTML=h}
+    h+=jpLine+noteLine+exampleHTML(w);fbArea.innerHTML=h}
   else if(quizFeedback==='wrong'){
     let h='<div class="verdict bad">Not quite</div>';
     if(quizMode==='conjugation')h+=conjLine();
     else h+='<div class="ans"><b>'+escapeHTML(w.english.join(', '))+'</b></div>';
-    h+=jpLine+'<div class="typed">You answered '+escapeHTML(quizLastInput)+'</div>'+wrongSuffix+exampleHTML(w);fbArea.innerHTML=h}
+    h+=jpLine+'<div class="typed">You answered '+escapeHTML(quizLastInput)+'</div>'+wrongSuffix+noteLine+exampleHTML(w);fbArea.innerHTML=h}
   else fbArea.innerHTML='';
 
   const inputArea=document.getElementById('quiz-input-area');
@@ -2300,40 +2386,8 @@ function submitChoice(chosenId,correctId){
   if(timerInterval){clearInterval(timerInterval);timerInterval=null}
   const w=quizQueue[quizIdx];
   quizLastInput=getAllWords().find(x=>x.id===chosenId)?.english[0]||'';
-  quizAnswered++;
   const isCorrect=chosenId===correctId;
-  if(isCorrect){
-    quizCorrect++;quizFeedback='correct';_feedbackShownAt=Date.now();currentStreak++;recordCorrect();
-    const wc=getWrongCount(w.id);
-    const justPrev=_justPreviewed.has(w.id);
-    if(justPrev)_justPreviewed.delete(w.id);
-    const sb=sessionBuckets[w.id]||(sessionBuckets[w.id]={bucket:0,lastSeen:-99});
-    if(!justPrev)sb.bucket=Math.min(sb.bucket+1,SESSION_GAPS.length);
-    if(sb.bucket<SESSION_GAPS.length){requeueWord(w)}
-    _lastGain=!justPrev&&sb.bucket>=SESSION_GAPS.length;
-    if(!justPrev&&sb.bucket>=SESSION_GAPS.length){
-      const ns=Math.min(9,getStars(w.id)+1);
-      progress[w.id]={stars:ns,wrongCount:ns>=9?0:wc};saveProgress();
-      if(ns===9){advanceSRS(w.id);playThreeStars()}
-      else if(ns===3||ns===6){playThreeStars()}
-      else if(ns===1)playOneStar();
-      else playCorrect();
-    } else {
-      progress[w.id]={stars:getStars(w.id),wrongCount:wc};saveProgress();
-      playCorrect();
-    }
-    if(sessionLimit===-3&&sb.bucket>=SESSION_GAPS.length){sb.bucket=0;quizQueue.push(w)}
-  } else {
-    quizFeedback='wrong';_feedbackShownAt=Date.now();playWrong();currentStreak=0;recordIncorrect();
-    if(!sessionWrong.some(x=>x.id===w.id))sessionWrong.push(w);
-    _justPreviewed.delete(w.id);
-    const sb=sessionBuckets[w.id]||(sessionBuckets[w.id]={bucket:0,lastSeen:-99});
-    sb.bucket=0;
-    requeueWord(w);
-    const curTier2=Math.floor(getStars(w.id)/3)*3;
-    progress[w.id]={stars:curTier2,wrongCount:getWrongCount(w.id)+1};saveProgress();
-    failSRS(w.id);
-  }
+  gradeAnswer(w,isCorrect);
   // Highlight by word id (two words can share a meaning's text)
   document.querySelectorAll('.choices .btn').forEach(b=>{
     if(b.dataset.id===correctId)b.classList.add('right');
@@ -2346,66 +2400,28 @@ function submitChoice(chosenId,correctId){
 function submitQuiz(){
   if(timerInterval){clearInterval(timerInterval);timerInterval=null}
   const el=document.getElementById('quiz-input');if(!el)return;const val=el.value;if(!val.trim())return;
-  quizLastInput=val;quizAnswered++;const w=quizQueue[quizIdx];
+  quizLastInput=val;const w=quizQueue[quizIdx];
   const isCorrect=quizMode==='conjugation'
     ?matchAnswer(val,conjAnswers(w,w._conjForm))
     :quizMode==='reverse'
     ?matchAnswer(val,reverseAnswers(w))
+    :quizMode==='listen'
+    ?matchAnswer(val,listenAnswers(w))
     :matchAnswer(val,w.english);
-  if(isCorrect){
-    quizCorrect++;quizFeedback='correct';_feedbackShownAt=Date.now();currentStreak++;recordCorrect();
-    const wc=getWrongCount(w.id);
-    const justPrev=_justPreviewed.has(w.id);
-    if(justPrev)_justPreviewed.delete(w.id);
-    // Advance session bucket
-    const sb=sessionBuckets[w.id]||(sessionBuckets[w.id]={bucket:0,lastSeen:-99});
-    if(!justPrev)sb.bucket=Math.min(sb.bucket+1,SESSION_GAPS.length);
-    // If not yet graduated (bucket < SESSION_GAPS.length), re-queue
-    if(sb.bucket<SESSION_GAPS.length){
-      requeueWord(w);
-    }
-    // Award stars only when graduated from session (bucket reaches SESSION_GAPS.length) and not just-previewed
-    _lastGain=!justPrev&&sb.bucket>=SESSION_GAPS.length;
-    if(!justPrev&&sb.bucket>=SESSION_GAPS.length){
-      const ns=Math.min(9,getStars(w.id)+1);
-      progress[w.id]={stars:ns,wrongCount:ns>=9?0:wc};saveProgress();
-      if(ns===9){advanceSRS(w.id);playThreeStars()}
-      else if(ns===3||ns===6){playThreeStars()} // tier upgrade
-      else if(ns===1)playOneStar();
-      else playCorrect();
-    } else {
-      progress[w.id]={stars:getStars(w.id),wrongCount:wc};saveProgress();
-      playCorrect();
-    }
-    // Infinite mode: when graduated a tier, reset bucket to cycle again
-    if(sessionLimit===-3&&sb.bucket>=SESSION_GAPS.length){
-      sb.bucket=0;
-      quizQueue.push(w);
-    }
-  } else {
-    quizFeedback='wrong';_feedbackShownAt=Date.now();playWrong();currentStreak=0;recordIncorrect();
-    if(!sessionWrong.some(x=>x.id===w.id))sessionWrong.push(w);
-    _justPreviewed.delete(w.id);
-    // Reset session bucket to 0 on wrong
-    const sb=sessionBuckets[w.id]||(sessionBuckets[w.id]={bucket:0,lastSeen:-99});
-    sb.bucket=0;
-    requeueWord(w);
-    // On wrong, drop back to start of current tier
-    const curTier=Math.floor(getStars(w.id)/3)*3;
-    progress[w.id]={stars:curTier,wrongCount:getWrongCount(w.id)+1};saveProgress();
-    failSRS(w.id);
-  }
+  gradeAnswer(w,isCorrect);
   speakJapanese(w.japanese,w.furigana);renderQuiz();
 }
 function showQuizInfo(){
   openSheet(`<h3>How scoring works</h3>
     <div class="legend">
-      <p><b>This session</b>Get a word right 3 times in a session, spaced apart, to earn its star for that session ("2 of 3 this session"). A wrong answer starts the count again.</p>
+      <p><b>New words</b>Get a new word right 3 times in a session, spaced apart, to earn its first star. A wrong answer starts the count again.</p>
+      <p><b>Reviews</b>Each star sets the day the word comes back: after 1, 2, 3, 5, 8, 13, 21, 34, then 55 days. One right answer on or after that day earns the next star. Reviews that are due always come first in a quiz.</p>
       <p><b><span class="lvdot lv1"></span> Learning, stars 1 to 2</b></p>
       <p><b><span class="lvdot lv2"></span> Familiar, stars 3 to 5</b></p>
       <p><b><span class="lvdot lv3"></span> Strong, stars 6 to 8</b></p>
-      <p><b><span class="lvdot lv4"></span> Mastered, 9 stars</b>The word then comes back for review after about 3 days, then roughly 9, 20, 48 and 158 days while you keep getting it right.</p>
-      <p><b>Wrong answers</b>Stars drop to the start of the current level, not to zero.</p>
+      <p><b><span class="lvdot lv4"></span> Mastered, 9 stars</b>About 3 months of right answers. Reviews then stretch further apart, up to a year.</p>
+      <p><b>Wrong answers</b>Stars drop to the start of the current level (Mastered drops to Strong) and the word is due again tomorrow.</p>
+      <p><b>What does not count</b>An answer given with the reading shown. A word practised before its review day. Choice mode above ${CHOICE_STAR_CAP} stars. Conjugate mode is practice only and never changes stars.</p>
     </div>
     <button class="btn full" onclick="closeSheet(this)">Got it</button>`);
 }
@@ -2443,7 +2459,7 @@ document.addEventListener('keydown',function(e){
   }
   // 1-4: multiple choice selection
   if(quizMode==='choice'&&!quizFeedback&&/^[1-4]$/.test(e.key)){
-    const btns=document.querySelectorAll('.choice-btn');
+    const btns=document.querySelectorAll('.choices .btn');
     const idx=parseInt(e.key)-1;
     if(btns[idx])btns[idx].click();return;
   }
@@ -2543,7 +2559,7 @@ function renderBrowse(){
   const filtered=all.filter(w=>{
     if(browseFilter==='mastered')return getStars(w.id)>=9;
     if(browseFilter==='unmastered')return getStars(w.id)<9;
-    if(browseFilter==='due')return getStars(w.id)>=9&&isDueForReview(w.id);
+    if(browseFilter==='due')return isDueForReview(w.id);
     if(browseFilter==='difficult')return getWrongCount(w.id)>=3;
     return true;
   });
@@ -2568,7 +2584,7 @@ function renderBrowse(){
   let html=sq?'<div class="sub">'+searched.length+' result'+(searched.length!==1?'s':'')+'</div>':'';
   activeCats.forEach(c=>{
     const info=CATEGORIES[c]||{name:c,icon:'?'};
-    html+='<div class="card" style="margin-bottom:12px"><div class="group-label" id="browse-cat-'+c+'"><span class="gl">'+info.icon+'</span>'+info.name+' <span class="n">'+grouped[c].length+'</span></div><div class="list">'+grouped[c].map(w=>wordRow(w)).join('')+'</div></div>';
+    html+='<div class="card" style="margin-bottom:12px"><div class="group-label" id="browse-cat-'+c+'"><span class="gl'+(info.pic?' pic':'')+'">'+catGlyph(info)+'</span>'+info.name+' <span class="n">'+grouped[c].length+'</span></div><div class="list">'+grouped[c].map(w=>wordRow(w)).join('')+'</div></div>';
   });
   favSections.forEach(({list,idx,words})=>{
     html+='<div class="card" style="margin-bottom:12px"><div class="group-label" id="browse-cat-fav-'+idx+'"><span class="gl">'+ico('heart',true)+'</span>'+escapeHTML(list.name)+' <span class="n">'+words.length+'</span><button class="btn small danger right" onclick="event.stopPropagation();deleteFavList('+idx+')">Delete list</button></div><div class="list">'+words.map(w=>wordRow(w,idx)).join('')+'</div></div>';
@@ -2610,7 +2626,7 @@ function importData(event){const file=event.target.files[0];if(!file)return;cons
       else{
         const keepStars=Math.max(cur.stars||0,imp.stars||0);
         const keepWrong=Math.max(cur.wrongCount||0,imp.wrongCount||0);
-        progress[id]={stars:keepStars,wrongCount:keepWrong};
+        progress[id]={stars:keepStars,wrongCount:keepWrong,seen:Math.max(cur.seen||0,imp.seen||0)};
         mergeStats.progMerged++;
       }
     });
@@ -2658,7 +2674,7 @@ function importData(event){const file=event.target.files[0];if(!file)return;cons
   renderMenu();
   const s=mergeStats;
   document.querySelectorAll('.overlay').forEach(o=>o.remove());
-  migrateMerged();
+  migrateMerged();migrateSchedule();renderMenu();
   notice('Import merged','Progress: '+s.progNew+' new, '+s.progMerged+' updated. Custom words: '+s.customAdded+' added, '+s.customSkipped+' already here.'+(s.overridesAdded?' Edited answers: '+s.overridesAdded+'.':''));
 }catch{notice('That file could not be read','Pick a .json export from this app.')}event.target.value=''};reader.readAsText(file)}
 
@@ -2736,8 +2752,16 @@ function updateVolumeIcon(){}
 
 
 function reverseAnswers(w){
+  // English to Japanese: every word that lists the prompt as a meaning is a right answer
+  // (the prompt "good morning" fits both おはよう and おはようございます), in kanji, kana or a listed alternative reading.
   const p=w.english[0].trim().toLowerCase();const out=[];
-  getAllWords().forEach(x=>{if(x.id===w.id||x.english.some(e=>e.trim().toLowerCase()===p)){out.push(x.japanese);if(x.furigana)out.push(x.furigana)}});
+  getAllWords().forEach(x=>{if(x.id===w.id||x.english.some(e=>e.trim().toLowerCase()===p)){out.push(x.japanese);if(x.furigana)out.push(x.furigana);if(x.alt)out.push(...x.alt)}});
+  return [...new Set(out)];
+}
+// Listening: words that sound the same cannot be told apart, so any of their meanings is right (きる: cut or wear).
+function listenAnswers(w){
+  const r=w.furigana||w.japanese;const out=[...w.english];
+  getAllWords().forEach(x=>{if(x.id!==w.id&&isCharMode(x)===isCharMode(w)&&(x.furigana||x.japanese)===r)out.push(...x.english)});
   return [...new Set(out)];
 }
 function levelName(s){return s>=9?'Mastered':s>=6?'Strong':s>=3?'Familiar':s>=1?'Learning':'New'}
@@ -2754,7 +2778,7 @@ function quizHeader(){
 function wordRow(w,favIdx){
   const isEdited=!!wordOverrides[w.id];
   const wc=getWrongCount(w.id);
-  const srs=getStars(w.id)>=9?'<span class="tag">'+getReviewSchedule(w.id)+'</span>':'';
+  const srs=getStars(w.id)>=1?'<span class="tag">'+getReviewSchedule(w.id)+'</span>':'';
   const diffTag=wc>=3?'<span class="warnmark" title="Wrong '+wc+' times">'+wc+' wrong</span>':'';
   const posTag=w.pos?'<span class="tag">'+w.pos+'</span>':'';
   const vgTag=w.vg?'<span class="tag">'+VG_NAMES[w.vg]+'</span>':'';
