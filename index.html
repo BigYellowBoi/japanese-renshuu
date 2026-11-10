@@ -56,11 +56,11 @@ body::after{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-
 ::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
 ::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--tint) 22%,transparent);border-radius:999px;border:3px solid transparent;background-clip:padding-box;min-height:40px}
 @supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--tint) 30%,transparent) transparent}}
-html,body{background:var(--ground);color:var(--text);overscroll-behavior:none;height:100%;overflow:hidden}
+html,body{background:var(--ground);color:var(--text);overscroll-behavior:none}
 /* As in Axiom: the page never scrolls; one fixed box does, so iOS gives it the rubber-band bounce at both ends. */
 #scroller{position:fixed;inset:0;z-index:1;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
 html{-webkit-text-size-adjust:100%;touch-action:manipulation}
-body{font-family:'Geist',system-ui,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;position:relative;overflow-x:hidden}
+body{min-height:100vh;font-family:'Geist',system-ui,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;position:relative;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;background:var(--bg);z-index:0;pointer-events:none}
 button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -260,6 +260,8 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .group-label .gl.pic{background:var(--accent-soft);color:var(--accent)}
 .group-label .gl svg{width:14px;height:14px}
 .group-label .n{color:var(--label);font-weight:400}
+/* Off-screen Browse cards skip layout and paint until scrolled near (about 1,300 rows in all). */
+#browse-list>.card{content-visibility:auto;contain-intrinsic-size:auto 900px}
 .group-label .right{margin-left:auto}
 .mnav{display:flex;flex-direction:column;gap:6px}
 @media(min-width:768px){
@@ -348,7 +350,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
 <script>
 const CATEGORIES={hiragana:{name:"Hiragana",icon:"あ"},katakana:{name:"Katakana",icon:"ア"},hiragana_combo:{name:"Combos",icon:"きゃ"},katakana_combo:{name:"Combos",icon:"キャ"},greetings:{name:"Greetings",icon:"挨",pic:"hand-stop"},numbers:{name:"Numbers",icon:"数",pic:"abacus"},food:{name:"Food & drink",icon:"食",pic:"bowl-chopsticks"},shopping:{name:"Shopping",icon:"買",pic:"shopping-bag"},directions:{name:"Directions",icon:"道",pic:"compass"},transport:{name:"Transport",icon:"車",pic:"train"},accommodation:{name:"Lodging",icon:"宿",pic:"bed"},restaurant:{name:"Restaurant",icon:"店",pic:"tools-kitchen-2"},sightseeing:{name:"Sightseeing",icon:"観",pic:"torii"},time:{name:"Time & days",icon:"時",pic:"clock"},people:{name:"People",icon:"人",pic:"users"},adjectives:{name:"Adjectives",icon:"形",pic:"sparkles"},verbs:{name:"Verbs",icon:"動",pic:"run"},essentials:{name:"Essentials",icon:"要",pic:"first-aid-kit"},conversation:{name:"Conversation",icon:"話",pic:"messages"},slang:{name:"Slang",icon:"俗",pic:"flame"},jlpt_n5:{name:"JLPT N5",icon:"N5"},jlpt_n4:{name:"JLPT N4",icon:"N4"},jlpt_n3:{name:"JLPT N3",icon:"N3"},jlpt_n2:{name:"JLPT N2",icon:"N2"},jlpt_n1:{name:"JLPT N1",icon:"N1"},custom:{name:"Custom",icon:"自",pic:"pencil"}};
-const APP_VERSION='2026-11-10.3';
+const APP_VERSION='2026-11-10.4';
 const CAT_ORDER=Object.keys(CATEGORIES);
 // Combos sit outside the default selection: with nothing picked, a quiz covers every other category.
 const OPT_IN_CATS=['hiragana_combo','katakana_combo'];
@@ -2609,16 +2611,28 @@ function renderBrowse(){
   });
   document.getElementById('cat-nav-mobile').innerHTML=navs.map(n=>n.mob).join('');
   document.getElementById('cat-nav-desktop').innerHTML=navs.map(n=>n.desk).join('');
-  let html=sq?'<div class="sub">'+searched.length+' result'+(searched.length!==1?'s':'')+'</div>':'';
+  const head=sq?'<div class="sub">'+searched.length+' result'+(searched.length!==1?'s':'')+'</div>':'';
+  const cards=[];
   activeCats.forEach(c=>{
     const info=CATEGORIES[c]||{name:c,icon:'?'};
-    html+='<div class="card" style="margin-bottom:12px"><div class="group-label" id="browse-cat-'+c+'"><span class="gl'+(info.pic?' pic':'')+'">'+catGlyph(info)+'</span>'+info.name+' <span class="n">'+grouped[c].length+'</span></div><div class="list">'+grouped[c].map(w=>wordRow(w)).join('')+'</div></div>';
+    cards.push({n:grouped[c].length,html:()=>'<div class="card" style="margin-bottom:12px"><div class="group-label" id="browse-cat-'+c+'"><span class="gl'+(info.pic?' pic':'')+'">'+catGlyph(info)+'</span>'+info.name+' <span class="n">'+grouped[c].length+'</span></div><div class="list">'+grouped[c].map(w=>wordRow(w)).join('')+'</div></div>'});
   });
   favSections.forEach(({list,idx,words})=>{
-    html+='<div class="card" style="margin-bottom:12px"><div class="group-label" id="browse-cat-fav-'+idx+'"><span class="gl">'+ico('heart',true)+'</span>'+escapeHTML(list.name)+' <span class="n">'+words.length+'</span><button class="btn small danger right" onclick="event.stopPropagation();deleteFavList('+idx+')">Delete list</button></div><div class="list">'+words.map(w=>wordRow(w,idx)).join('')+'</div></div>';
+    cards.push({n:words.length,html:()=>'<div class="card" style="margin-bottom:12px"><div class="group-label" id="browse-cat-fav-'+idx+'"><span class="gl">'+ico('heart',true)+'</span>'+escapeHTML(list.name)+' <span class="n">'+words.length+'</span><button class="btn small danger right" onclick="event.stopPropagation();deleteFavList('+idx+')">Delete list</button></div><div class="list">'+words.map(w=>wordRow(w,idx)).join('')+'</div></div>'});
   });
-  if(!html)html='<div class="sub">No words match.</div>';
-  document.getElementById('browse-list').innerHTML=html;
+  paintBrowse(head,cards);
+}
+// Browse holds every word (about 1,300 rows, 27,000 elements): drawing them all at once froze the
+// screen for a second or more on the phone. Draw the first screenful now, the rest a batch a frame.
+let _browseGen=0,_browseFlush=()=>{};
+function paintBrowse(head,cards){
+  const gen=++_browseGen,list=document.getElementById('browse-list');let i=0;
+  const step=budget=>{let html='',rows=0;while(i<cards.length&&rows<budget){html+=cards[i].html();rows+=cards[i].n;i++}if(html)list.insertAdjacentHTML('beforeend',html)};
+  list.innerHTML=cards.length?head:'<div class="sub">No words match.</div>';
+  step(40);
+  _browseFlush=()=>{if(gen===_browseGen)step(Infinity)};
+  const more=()=>{if(gen!==_browseGen||i>=cards.length)return;step(30);setTimeout(more,30)};
+  requestAnimationFrame(()=>setTimeout(more,30));
 }
 function toggleCatNav(){
   const nav=document.getElementById('cat-nav-mobile');
@@ -2627,8 +2641,11 @@ function toggleCatNav(){
 function scrollToBrowseCat(cat){
   const nav=document.getElementById('cat-nav-mobile');
   if(nav&&!nav.classList.contains('hidden'))nav.classList.add('hidden');
-  const el=document.getElementById('browse-cat-'+cat);if(!el)return;
-  el.scrollIntoView({behavior:'smooth',block:'start'});
+  let el=document.getElementById('browse-cat-'+cat);
+  if(!el){_browseFlush();el=document.getElementById('browse-cat-'+cat)}
+  if(!el)return;
+  // Off-screen cards have estimated heights until drawn, so jump, let the cards near the target draw, and jump again until it holds.
+  let n=0,last=null;const go=()=>{el.scrollIntoView({block:'start'});const t=Math.round(el.getBoundingClientRect().top);if(t!==last&&n++<12){last=t;requestAnimationFrame(go)}};go();
 }
 function setBrowseFilter(f){browseFilter=f;renderBrowse()}
 function editWord(id){
