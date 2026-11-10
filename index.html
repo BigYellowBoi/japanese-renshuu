@@ -56,9 +56,11 @@ body::after{content:'';position:fixed;left:0;right:0;top:0;height:calc(env(safe-
 ::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
 ::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--tint) 22%,transparent);border-radius:999px;border:3px solid transparent;background-clip:padding-box;min-height:40px}
 @supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--tint) 30%,transparent) transparent}}
-html,body{background:var(--ground);color:var(--text);overscroll-behavior:none}
+html,body{background:var(--ground);color:var(--text);overscroll-behavior:none;height:100%;overflow:hidden}
+/* As in Axiom: the page never scrolls; one fixed box does, so iOS gives it the rubber-band bounce at both ends. */
+#scroller{position:fixed;inset:0;z-index:1;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
 html{-webkit-text-size-adjust:100%;touch-action:manipulation}
-body{min-height:100vh;font-family:'Geist',system-ui,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;position:relative;overflow-x:hidden}
+body{font-family:'Geist',system-ui,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;position:relative;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;background:var(--bg);z-index:0;pointer-events:none}
 button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -67,7 +69,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .mono{font-variant-numeric:tabular-nums}
 .hidden,[hidden]{display:none!important}
 
-.app{position:relative;z-index:1;max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;gap:16px;
+.app{position:relative;z-index:1;max-width:560px;margin:0 auto;min-height:calc(100% + 1px);display:flex;flex-direction:column;gap:16px;
   padding:calc(16px + env(safe-area-inset-top) + var(--hdrdrop)) 16px calc(24px + env(safe-area-inset-bottom))}
 @media(min-width:768px){.app{max-width:960px;padding:32px 32px 48px}}
 
@@ -283,7 +285,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 </style>
 </head>
 <body>
-<div class="app" id="app">
+<div id="scroller"><div class="app" id="app">
 
 <div id="screen-menu" class="stack" style="gap:16px">
   <div class="head">
@@ -342,11 +344,11 @@ input[type=range]{width:100%;accent-color:var(--accent)}
   <div class="bbody"><nav class="bnav" id="cat-nav-desktop"></nav><div class="bmain" id="browse-list"></div></div>
 </div>
 
-</div>
+</div></div>
 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
 <script>
 const CATEGORIES={hiragana:{name:"Hiragana",icon:"あ"},katakana:{name:"Katakana",icon:"ア"},hiragana_combo:{name:"Combos",icon:"きゃ"},katakana_combo:{name:"Combos",icon:"キャ"},greetings:{name:"Greetings",icon:"挨",pic:"hand-stop"},numbers:{name:"Numbers",icon:"数",pic:"abacus"},food:{name:"Food & drink",icon:"食",pic:"bowl-chopsticks"},shopping:{name:"Shopping",icon:"買",pic:"shopping-bag"},directions:{name:"Directions",icon:"道",pic:"compass"},transport:{name:"Transport",icon:"車",pic:"train"},accommodation:{name:"Lodging",icon:"宿",pic:"bed"},restaurant:{name:"Restaurant",icon:"店",pic:"tools-kitchen-2"},sightseeing:{name:"Sightseeing",icon:"観",pic:"torii"},time:{name:"Time & days",icon:"時",pic:"clock"},people:{name:"People",icon:"人",pic:"users"},adjectives:{name:"Adjectives",icon:"形",pic:"sparkles"},verbs:{name:"Verbs",icon:"動",pic:"run"},essentials:{name:"Essentials",icon:"要",pic:"first-aid-kit"},conversation:{name:"Conversation",icon:"話",pic:"messages"},slang:{name:"Slang",icon:"俗",pic:"flame"},jlpt_n5:{name:"JLPT N5",icon:"N5"},jlpt_n4:{name:"JLPT N4",icon:"N4"},jlpt_n3:{name:"JLPT N3",icon:"N3"},jlpt_n2:{name:"JLPT N2",icon:"N2"},jlpt_n1:{name:"JLPT N1",icon:"N1"},custom:{name:"Custom",icon:"自",pic:"pencil"}};
-const APP_VERSION='2026-11-10.2';
+const APP_VERSION='2026-11-10.3';
 const CAT_ORDER=Object.keys(CATEGORIES);
 // Combos sit outside the default selection: with nothing picked, a quiz covers every other category.
 const OPT_IN_CATS=['hiragana_combo','katakana_combo'];
@@ -2028,13 +2030,16 @@ function localDate(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMon
 function today(){return localDate()}
 
 // ============ SCREENS ============
-function lockBody(){document.body.style.position='fixed';document.body.style.width='100%';document.body.style.overflow='hidden'}
-function unlockBody(){document.body.style.position='';document.body.style.width='';document.body.style.overflow=''}
+const scroller=()=>document.getElementById('scroller');
+function lockBody(){document.body.style.position='fixed';document.body.style.width='100%';scroller().style.overflowY='hidden'}
+function unlockBody(){document.body.style.position='';document.body.style.width='';scroller().style.overflowY=''}
+// New screen: back to the top with no leftover momentum (iOS ignores scrollTop while a fling is running).
+function scrollTopNow(){const sc=scroller(),keep=sc.style.overflowY;sc.style.overflowY='hidden';sc.scrollTop=0;requestAnimationFrame(()=>{sc.style.overflowY=keep})}
 function showScreen(name){
   if(name==='quiz')lockBody();else unlockBody();
   ['menu','quiz','done','add','browse'].forEach(s=>{const el=document.getElementById('screen-'+s);if(el)el.classList.toggle('hidden',s!==name)});
   if(timerInterval&&name!=='quiz'){clearInterval(timerInterval);timerInterval=null}
-  window.scrollTo(0,0);
+  scrollTopNow();
   if(name==='menu')renderMenu();
   if(name==='add')renderAdd();
   if(name==='browse'){const bs=document.getElementById('browse-search');if(bs)bs.value='';const nav=document.getElementById('cat-nav-mobile');if(nav)nav.classList.add('hidden');renderBrowse()}
