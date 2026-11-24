@@ -60,6 +60,8 @@ html,body{background:var(--ground);color:var(--text);overscroll-behavior:none}
 /* As in Axiom: the page never scrolls; one fixed box does, so iOS gives it the rubber-band bounce at both ends. */
 #scroller{position:fixed;inset:0;z-index:1;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
 html{-webkit-text-size-adjust:100%;touch-action:manipulation}
+/* Sync (his copy only): sign-in banner below the status bar and the blur band, above the solid strip. */
+.syncbar{position:fixed;z-index:70;left:12px;right:12px;top:calc(env(safe-area-inset-top) + var(--hdrdrop) + 8px);max-width:536px;margin:0 auto;display:flex;align-items:center;gap:12px;justify-content:space-between;padding:10px 12px;border-radius:12px;background:var(--raised);border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.4);font-size:13px}
 body{min-height:100vh;font-family:'Geist',system-ui,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;position:relative;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;background:var(--bg);z-index:0;pointer-events:none}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -350,7 +352,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
 <script>
 const CATEGORIES={hiragana:{name:"Hiragana",icon:"あ"},katakana:{name:"Katakana",icon:"ア"},hiragana_combo:{name:"Combos",icon:"きゃ"},katakana_combo:{name:"Combos",icon:"キャ"},greetings:{name:"Greetings",icon:"挨",pic:"hand-stop"},numbers:{name:"Numbers",icon:"数",pic:"abacus"},food:{name:"Food & drink",icon:"食",pic:"bowl-chopsticks"},shopping:{name:"Shopping",icon:"買",pic:"shopping-bag"},directions:{name:"Directions",icon:"道",pic:"compass"},transport:{name:"Transport",icon:"車",pic:"train"},accommodation:{name:"Lodging",icon:"宿",pic:"bed"},restaurant:{name:"Restaurant",icon:"店",pic:"tools-kitchen-2"},sightseeing:{name:"Sightseeing",icon:"観",pic:"torii"},time:{name:"Time & days",icon:"時",pic:"clock"},people:{name:"People",icon:"人",pic:"users"},adjectives:{name:"Adjectives",icon:"形",pic:"sparkles"},verbs:{name:"Verbs",icon:"動",pic:"run"},essentials:{name:"Essentials",icon:"要",pic:"first-aid-kit"},conversation:{name:"Conversation",icon:"話",pic:"messages"},slang:{name:"Slang",icon:"俗",pic:"flame"},jlpt_n5:{name:"JLPT N5",icon:"N5"},jlpt_n4:{name:"JLPT N4",icon:"N4"},jlpt_n3:{name:"JLPT N3",icon:"N3"},jlpt_n2:{name:"JLPT N2",icon:"N2"},jlpt_n1:{name:"JLPT N1",icon:"N1"},custom:{name:"Custom",icon:"自",pic:"pencil"}};
-const APP_VERSION='2026-11-10.4';
+const APP_VERSION='2026-11-25.1';
 const CAT_ORDER=Object.keys(CATEGORIES);
 // Combos sit outside the default selection: with nothing picked, a quiz covers every other category.
 const OPT_IN_CATS=['hiragana_combo','katakana_combo'];
@@ -1898,7 +1900,10 @@ function getSRS(id){const d=_loadSRS();return d[id]||{nextReview:0,ivl:0}}
 function saveSRS(id,data){const d=_loadSRS();d[id]=data;_saveSRS()}
 function resetSRSStorage(){_srsCache={};_saveSRS()}
 function dayStart(offset){const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate()+(offset||0)).getTime()}
-function isDueForReview(id){return getStars(id)>=1&&(getSRS(id).nextReview||0)<=Date.now()}
+// The calendar day a review falls on, wherever it was scheduled: nextReview is a local midnight on the device
+// that set it, so a word set in Brisbane (an hour ahead of Japan) lands on the same date in Japan, not at 11pm the day before.
+function reviewDate(ms){return localDate(new Date(ms+43200000))}
+function isDueForReview(id){if(getStars(id)<1)return false;const nr=getSRS(id).nextReview||0;return nr<=Date.now()||reviewDate(nr)<=today()}
 function scheduleReview(id,days){saveSRS(id,{nextReview:dayStart(days),ivl:days})}
 function scheduleForStar(id,stars){scheduleReview(id,STAR_DAYS[Math.max(1,Math.min(9,stars))-1])}
 function stretchMastered(id){
@@ -2731,7 +2736,7 @@ function openSettings(){
     <div class="field"><span class="label">Your data</span><div class="grid2"><button class="btn" onclick="exportData()">Export</button><button class="btn" onclick="document.getElementById('import-file').click()">Import</button></div></div>
     <button class="btn danger full" onclick="resetProgress(this)">Reset progress</button>
     <button class="btn full" onclick="closeSheet(this)">Done</button>
-    <div class="sub" style="text-align:center">Version ${APP_VERSION}${document.documentElement.classList.contains('standalone')?' · home-screen app':''}</div>`);
+    <div class="sub" style="text-align:center">Version ${APP_VERSION}${document.documentElement.classList.contains('standalone')?' · home-screen app':''}${jpSync.on?'<br>'+jpSync.line():''}</div>`);
   updateSettingsVolIcon();
 }
 function updateSettingsVolIcon(){
@@ -2743,7 +2748,7 @@ function openStats(){
   const all=getAllWords();
   const n=(lo,hi)=>all.filter(w=>{const s=getStars(w.id);return s>=lo&&s<=hi}).length;
   const newLearnt=all.filter(w=>getStars(w.id)>0||(progress[w.id]&&progress[w.id].wrongCount>0)).length;
-  const ls=getLifetimeStats();
+  const ls=getAllStats();
   const total=ls.correct+ls.incorrect;
   const acc=total>0?Math.round((ls.correct/total)*100):0;
   const row=(dot,label,v)=>'<div class="statrow">'+(dot?'<span class="lvdot '+dot+'"></span>':'')+'<span>'+label+'</span><span class="v">'+v+'</span></div>';
@@ -2759,7 +2764,7 @@ function openStats(){
 }
 function renderHeatmap(){
   const el=document.getElementById('stats-heatmap');if(!el)return;
-  const log=getActivityLog();
+  const log=getAllActivity();
   const now=new Date();
   const days=[];
   for(let i=90;i>=0;i--){
@@ -2835,12 +2840,175 @@ function wordRow(w,favIdx){
 }
 function speakId(id){const w=getAllWords().find(x=>x.id===id);if(w)speakJapanese(w.japanese,w.furigana)}
 
+// ============ SYNC (Louis's copy only) ============
+// Off unless the page sets window.JP_SYNC, which only the copy Axiom serves at /japanese/ does; this public
+// page keeps per-browser storage and never calls out. Saved data goes up as keys, last write wins by edit time:
+// w:<id> {p: progress {stars,wrongCount,seen,day}, r: review {nextReview,ivl}} (stars and review day as one
+// unit), streak, c:<id> custom words, o:<id> edited answers, fav (all lists), m:<id> milestones seen, and per
+// device s:<device> answer totals and a:<device> daily activity (summed for Stats). Volume and the new word
+// card setting stay per device. Syncs on open, on return, 2 s after a save, on reconnect; no timer.
+const jpSync=(()=>{
+  const cfg=window.JP_SYNC||null,META='jp-beg2-sync',KEYOK=/^[a-z]{1,12}(:[A-Za-z0-9_.:-]{1,100})?$/,BATCH=500;
+  const WATCH=new Set([STORAGE.progress,STORAGE.srs,STORAGE.custom,STORAGE.overrides,STORAGE.favourites,STORAGE.streak,STORAGE.lifetimeStats,STORAGE.activityLog,STORAGE.milestones]);
+  let meta=null,applying=false,timer=null,busy=false,again=false,state='idle',lastOk=0,waiting=0;
+  const readMeta=()=>{try{meta=JSON.parse(localStorage.getItem(META)||'null')}catch{meta=null}
+    if(!meta||typeof meta!=='object')meta={};
+    if(!meta.dev)meta.dev=Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
+    meta.cursor=meta.cursor||0;meta.known=meta.known||{};meta.others=meta.others||{};lastOk=meta.lastOk||0};
+  const saveMeta=()=>{meta.lastOk=lastOk;try{localStorage.setItem(META,JSON.stringify(meta))}catch{}};
+  // Every synced key and its current value.
+  function snapshot(){
+    const out={},srs=_loadSRS();
+    new Set([...Object.keys(progress),...Object.keys(srs)]).forEach(id=>{
+      if(progress[id]||srs[id])out['w:'+id]={p:progress[id]||null,r:srs[id]||null}});
+    const st=getStreak();if(st.count||st.lastDate)out.streak=st;
+    customWords.forEach(w=>{out['c:'+w.id]=w});
+    Object.keys(wordOverrides).forEach(id=>{out['o:'+id]=wordOverrides[id]});
+    if(favLists.length)out.fav=favLists;
+    getSeenMilestones().forEach(id=>{out['m:'+id]=1});
+    const ls=getLifetimeStats();if(ls.correct||ls.incorrect)out['s:'+meta.dev]=ls;
+    const al=getActivityLog();if(Object.keys(al).length)out['a:'+meta.dev]=al;
+    Object.keys(out).forEach(k=>{if(!KEYOK.test(k))delete out[k]});
+    return out;
+  }
+  const str=v=>v==null?null:JSON.stringify(v);
+  // Keys changed here since they were last sent or received.
+  function changes(snap,now){
+    const rows=[];
+    for(const k in snap){const j=str(snap[k]);if(!meta.known[k]||meta.known[k].j!==j)rows.push({k,v:j,t:now})}
+    for(const k in meta.known){if(!(k in snap)&&meta.known[k].j!==null)rows.push({k,v:null,t:now})}
+    return rows;
+  }
+  // What Axiom's Today widget shows: reviews due per local date, the streak, words started.
+  function summary(){
+    const due={};let words=0;
+    getAllWords().forEach(w=>{if(getStars(w.id)<1)return;words++;
+      const nr=getSRS(w.id).nextReview||0;const d=nr>0?reviewDate(nr):'1970-01-01';due[d]=(due[d]||0)+1});
+    return {due,streak:getStreak(),words};
+  }
+  // A value from the server into this device's data. Returns the store it touched.
+  function put(k,j){
+    const v=j==null?null:JSON.parse(j),i=k.indexOf(':'),kind=i<0?k:k.slice(0,i),id=i<0?'':k.slice(i+1);
+    if(kind==='w'){const srs=_loadSRS();
+      if(v&&v.p)progress[id]=v.p;else delete progress[id];
+      if(v&&v.r)srs[id]=v.r;else delete srs[id];return 'w'}
+    if(kind==='streak'){localStorage.setItem(STORAGE.streak,JSON.stringify(v||{count:0,lastDate:''}));return 'streak'}
+    if(kind==='c'){const at=customWords.findIndex(w=>w.id===id);
+      if(v){if(!v.cat)v.cat='custom';if(at>=0)customWords[at]=v;else customWords.push(v)}else if(at>=0)customWords.splice(at,1);return 'c'}
+    if(kind==='o'){if(v)wordOverrides[id]=v;else delete wordOverrides[id];return 'o'}
+    if(kind==='fav'){favLists=Array.isArray(v)?v:[];return 'fav'}
+    if(kind==='m'){const seen=getSeenMilestones().filter(x=>x!==id);if(v)seen.push(id);localStorage.setItem(STORAGE.milestones,JSON.stringify(seen));return 'm'}
+    if(kind==='s'||kind==='a'){
+      if(id===meta.dev){ // this device's own totals: only taken back if this copy has none (storage was cleared)
+        if(kind==='s'&&v&&!(getLifetimeStats().correct+getLifetimeStats().incorrect))saveLifetimeStats(v);
+        if(kind==='a'&&v&&!Object.keys(getActivityLog()).length)localStorage.setItem(STORAGE.activityLog,JSON.stringify(v));
+        return kind}
+      const o=meta.others[id]||(meta.others[id]={});if(v)o[kind]=v;else delete o[kind];return kind}
+    return null;
+  }
+  function apply(rows){
+    if(!rows.length)return;
+    const before=snapshot(),touched=new Set();
+    applying=true;
+    try{
+      for(const r of rows){
+        const mine=meta.known[r.k];
+        // Edited here again while the request was out: keep the local edit, it goes up next round.
+        const local=str(before[r.k]??null);
+        const dirty=mine?local!==mine.j:local!==null;
+        if(dirty)continue;
+        if(local!==r.v){const t=put(r.k,r.v);if(t)touched.add(t)}
+        meta.known[r.k]={t:r.t,j:null};
+      }
+      if(touched.has('w')){saveProgress();_saveSRS()}
+      if(touched.has('c'))saveCustom();
+      if(touched.has('o'))saveOverrides();
+      if(touched.has('fav'))saveFavourites();
+    }finally{applying=false}
+    // Known values are this device's own spelling of them, so a later compare is exact.
+    const after=snapshot();
+    for(const r of rows){if(meta.known[r.k]&&meta.known[r.k].j===null)meta.known[r.k].j=str(after[r.k]??null)}
+    if(touched.size)refresh();
+  }
+  function refresh(){
+    const vis=s=>{const el=document.getElementById('screen-'+s);return el&&!el.classList.contains('hidden')};
+    if(vis('menu')&&!document.querySelector('.overlay'))renderMenu();
+  }
+  async function call(path,opts){
+    const res=await fetch(cfg.api+path,{credentials:'same-origin',cache:'no-store',...opts,
+      headers:{'X-Requested-With':'XMLHttpRequest',...(opts&&opts.body?{'content-type':'application/json'}:{})}});
+    if(res.status===401||res.redirected||!(res.headers.get('content-type')||'').includes('json')){const e=new Error('signin');e.signin=true;throw e}
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    return res.json();
+  }
+  async function run(keepalive){
+    if(busy){again=true;return}
+    busy=true;clearTimeout(timer);timer=null;
+    try{
+      let rounds=0;
+      do{
+        again=false;
+        const now=Date.now(),all=changes(snapshot(),now),rows=all.slice(0,BATCH);
+        waiting=all.length;
+        const sum=summary(),sumJ=JSON.stringify(sum),sumChanged=sumJ!==meta.sentSum&&all.length<=BATCH;
+        let res;
+        if(!rows.length&&!sumChanged)res=await call('?since='+meta.cursor);
+        else res=await call('',{method:'POST',keepalive:!!keepalive,body:JSON.stringify({rows,since:meta.cursor,summary:sumChanged?sum:undefined})});
+        // Sent keys the server already had a newer value for come back in res.rows and are applied.
+        rows.forEach(r=>{meta.known[r.k]={t:r.t,j:r.v}});
+        if(sumChanged)meta.sentSum=sumJ;
+        apply(res.rows||[]);
+        meta.cursor=res.cursor||meta.cursor;
+        lastOk=Date.now();state='ok';waiting=Math.max(0,all.length-rows.length);saveMeta();banner();
+        if(res.more||all.length>BATCH)again=true;
+        else if(changes(snapshot(),Date.now()).length||JSON.stringify(summary())!==meta.sentSum)again=true;
+      }while(again&&++rounds<12);
+    }catch(e){
+      state=e.signin?'signin':'offline';
+      waiting=changes(snapshot(),Date.now()).length;
+      banner();
+    }finally{busy=false}
+  }
+  function soon(){if(!cfg||applying)return;clearTimeout(timer);timer=setTimeout(()=>run(),2000)}
+  function banner(){
+    let el=document.getElementById('sync-banner');
+    if(state!=='signin'){if(el)el.remove();return}
+    if(!el){el=document.createElement('div');el.id='sync-banner';el.className='syncbar';document.body.appendChild(el)}
+    el.innerHTML='<span>Your sign-in has expired'+(waiting?'; '+waiting+' change'+(waiting===1?'':'s')+' waiting':'')+'.</span><button class="btn small primary" onclick="location.reload()">Sign in</button>';
+  }
+  function line(){
+    if(!cfg)return '';
+    const ago=lastOk?Math.round((Date.now()-lastOk)/60000):null;
+    const when=ago==null?'not yet':ago<1?'just now':ago<60?ago+' min ago':new Date(lastOk).toLocaleString();
+    return state==='signin'?'Sign-in expired, '+waiting+' waiting':state==='offline'?'Offline'+(waiting?', '+waiting+' waiting':'')+'; last synced '+when:'Synced '+when;
+  }
+  function start(){
+    if(!cfg)return;
+    readMeta();saveMeta();
+    const orig=Storage.prototype.setItem;
+    Storage.prototype.setItem=function(k,v){orig.call(this,k,v);if(this===localStorage&&WATCH.has(k))soon()};
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')run();else if(timer||changes(snapshot(),Date.now()).length)run(true)});
+    window.addEventListener('online',()=>run());
+    window.addEventListener('pageshow',e=>{if(e.persisted)run()});
+    // Offline cold start: Axiom's service worker keeps a copy of this page.
+    if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js',{scope:'/japanese/'}).catch(()=>{});
+    run();
+  }
+  // Stats across devices: this device's own plus every other device's last copy.
+  function others(kind){return Object.values((meta&&meta.others)||{}).map(o=>o[kind]).filter(Boolean)}
+  return {on:!!cfg,start,run,line,others,_t:{snapshot,changes,summary,apply,put,meta:()=>meta,readMeta}};
+})();
+function getAllStats(){const s={...getLifetimeStats()};jpSync.others('s').forEach(o=>{s.correct+=o.correct||0;s.incorrect+=o.incorrect||0});return s}
+function getAllActivity(){const log=JSON.parse(JSON.stringify(getActivityLog()));
+  jpSync.others('a').forEach(a=>Object.entries(a).forEach(([d,e])=>{const x=log[d]||(log[d]={correct:0,incorrect:0});x.correct+=e.correct||0;x.incorrect+=e.incorrect||0}));return log}
+
 // ============ INIT ============
 history.scrollRestoration='manual';
 // iOS ignores user-scalable=no on its own; block pinch zoom too.
 ['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
 hydrateIcons();
 loadStorage();loadSettings();showScreen('menu');
+jpSync.start();
 
 // Shrink quiz card when iOS keyboard appears (visual viewport shrinks)
 // Keyboard layout: screen is fixed so content stays put when keyboard opens
