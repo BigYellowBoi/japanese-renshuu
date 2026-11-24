@@ -61,6 +61,7 @@ html,body{background:var(--ground);color:var(--text);overscroll-behavior:none}
 #scroller{position:fixed;inset:0;z-index:1;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
 html{-webkit-text-size-adjust:100%;touch-action:manipulation}
 /* Sync (his copy only): sign-in banner below the status bar and the blur band, above the solid strip. */
+.axback{gap:2px;padding-left:6px;padding-right:10px;flex:none}
 .syncbar{position:fixed;z-index:70;left:12px;right:12px;top:calc(env(safe-area-inset-top) + var(--hdrdrop) + 8px);max-width:536px;margin:0 auto;display:flex;align-items:center;gap:12px;justify-content:space-between;padding:10px 12px;border-radius:12px;background:var(--raised);border:1px solid var(--line);box-shadow:0 8px 24px rgba(0,0,0,.4);font-size:13px}
 body{min-height:100vh;font-family:'Geist',system-ui,sans-serif;font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;position:relative;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;background:var(--bg);z-index:0;pointer-events:none}
@@ -293,6 +294,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 
 <div id="screen-menu" class="stack" style="gap:16px">
   <div class="head">
+    <button class="btn ghost small axback" id="axiom-back" hidden onclick="jpSync.back()" aria-label="Back to Axiom"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Axiom</button>
     <div class="flag" role="img" aria-label="Japanese flag"><i></i></div>
     <div class="grow"><h1><span class="jp">日本語練習</span></h1><div class="sub" id="menu-mastered-text"></div></div>
     <button class="btn ghost sq" onclick="openStats()" title="Stats" aria-label="Stats" data-ico="chart"></button>
@@ -352,7 +354,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
 <script>
 const CATEGORIES={hiragana:{name:"Hiragana",icon:"あ"},katakana:{name:"Katakana",icon:"ア"},hiragana_combo:{name:"Combos",icon:"きゃ"},katakana_combo:{name:"Combos",icon:"キャ"},greetings:{name:"Greetings",icon:"挨",pic:"hand-stop"},numbers:{name:"Numbers",icon:"数",pic:"abacus"},food:{name:"Food & drink",icon:"食",pic:"bowl-chopsticks"},shopping:{name:"Shopping",icon:"買",pic:"shopping-bag"},directions:{name:"Directions",icon:"道",pic:"compass"},transport:{name:"Transport",icon:"車",pic:"train"},accommodation:{name:"Lodging",icon:"宿",pic:"bed"},restaurant:{name:"Restaurant",icon:"店",pic:"tools-kitchen-2"},sightseeing:{name:"Sightseeing",icon:"観",pic:"torii"},time:{name:"Time & days",icon:"時",pic:"clock"},people:{name:"People",icon:"人",pic:"users"},adjectives:{name:"Adjectives",icon:"形",pic:"sparkles"},verbs:{name:"Verbs",icon:"動",pic:"run"},essentials:{name:"Essentials",icon:"要",pic:"first-aid-kit"},conversation:{name:"Conversation",icon:"話",pic:"messages"},slang:{name:"Slang",icon:"俗",pic:"flame"},jlpt_n5:{name:"JLPT N5",icon:"N5"},jlpt_n4:{name:"JLPT N4",icon:"N4"},jlpt_n3:{name:"JLPT N3",icon:"N3"},jlpt_n2:{name:"JLPT N2",icon:"N2"},jlpt_n1:{name:"JLPT N1",icon:"N1"},custom:{name:"Custom",icon:"自",pic:"pencil"}};
-const APP_VERSION='2026-11-25.1';
+const APP_VERSION='2026-11-25.2';
 const CAT_ORDER=Object.keys(CATEGORIES);
 // Combos sit outside the default selection: with nothing picked, a quiz covers every other category.
 const OPT_IN_CATS=['hiragana_combo','katakana_combo'];
@@ -2982,8 +2984,23 @@ const jpSync=(()=>{
     const when=ago==null?'not yet':ago<1?'just now':ago<60?ago+' min ago':new Date(lastOk).toLocaleString();
     return state==='signin'?'Sign-in expired, '+waiting+' waiting':state==='offline'?'Offline'+(waiting?', '+waiting+' waiting':'')+'; last synced '+when:'Synced '+when;
   }
+  // Opened from Axiom's Today widget (?from=axiom): a back button to Axiom, kept for the session (Axiom 0.10.3).
+  const FROM='jp-from-axiom';
+  function fromAxiom(){
+    try{if(new URLSearchParams(location.search).get('from')==='axiom'){sessionStorage.setItem(FROM,'1');history.replaceState(null,'',location.pathname)}}catch{}
+    let on=false;try{on=sessionStorage.getItem(FROM)==='1'}catch{}
+    const b=document.getElementById('axiom-back');if(b)b.hidden=!on;
+  }
+  function back(){
+    try{sessionStorage.removeItem(FROM)}catch{}
+    let ref=null;try{ref=document.referrer?new URL(document.referrer):null}catch{}
+    // Straight back to the Axiom page it came from (kept as it was), else open Axiom's Today.
+    if(ref&&ref.origin===location.origin&&!ref.pathname.startsWith('/japanese')&&history.length>1)history.back();
+    else location.href='/#/';
+  }
   function start(){
     if(!cfg)return;
+    fromAxiom();
     readMeta();saveMeta();
     const orig=Storage.prototype.setItem;
     Storage.prototype.setItem=function(k,v){orig.call(this,k,v);if(this===localStorage&&WATCH.has(k))soon()};
@@ -2996,7 +3013,7 @@ const jpSync=(()=>{
   }
   // Stats across devices: this device's own plus every other device's last copy.
   function others(kind){return Object.values((meta&&meta.others)||{}).map(o=>o[kind]).filter(Boolean)}
-  return {on:!!cfg,start,run,line,others,_t:{snapshot,changes,summary,apply,put,meta:()=>meta,readMeta}};
+  return {on:!!cfg,start,run,line,others,back,_t:{snapshot,changes,summary,apply,put,meta:()=>meta,readMeta}};
 })();
 function getAllStats(){const s={...getLifetimeStats()};jpSync.others('s').forEach(o=>{s.correct+=o.correct||0;s.incorrect+=o.incorrect||0});return s}
 function getAllActivity(){const log=JSON.parse(JSON.stringify(getActivityLog()));
