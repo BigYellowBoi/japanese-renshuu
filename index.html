@@ -249,6 +249,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .newword .mean{font-size:20px;font-weight:600}
 .qinput{width:100%;display:flex;flex-direction:column;gap:8px}
 .qinput .row .input{flex:1}
+.qinput .input.locked{color:var(--text-2)}
 .choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
 .choices .btn{min-height:52px;white-space:normal;line-height:1.25}
 .choices .btn.right{background:color-mix(in srgb,var(--good) 20%,var(--ground));border-color:var(--good)}
@@ -373,7 +374,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
 <script>
 const CATEGORIES={hiragana:{name:"Hiragana",icon:"あ"},katakana:{name:"Katakana",icon:"ア"},hiragana_combo:{name:"Combos",icon:"きゃ"},katakana_combo:{name:"Combos",icon:"キャ"},greetings:{name:"Greetings",icon:"挨",pic:"hand-stop"},numbers:{name:"Numbers",icon:"数",pic:"abacus"},food:{name:"Food & drink",icon:"食",pic:"bowl-chopsticks"},shopping:{name:"Shopping",icon:"買",pic:"shopping-bag"},directions:{name:"Directions",icon:"道",pic:"compass"},transport:{name:"Transport",icon:"車",pic:"train"},accommodation:{name:"Lodging",icon:"宿",pic:"bed"},restaurant:{name:"Restaurant",icon:"店",pic:"tools-kitchen-2"},sightseeing:{name:"Sightseeing",icon:"観",pic:"torii"},time:{name:"Time & days",icon:"時",pic:"clock"},people:{name:"People",icon:"人",pic:"users"},adjectives:{name:"Adjectives",icon:"形",pic:"sparkles"},verbs:{name:"Verbs",icon:"動",pic:"run"},essentials:{name:"Essentials",icon:"要",pic:"first-aid-kit"},conversation:{name:"Conversation",icon:"話",pic:"messages"},slang:{name:"Slang",icon:"俗",pic:"flame"},jlpt_n5:{name:"JLPT N5",icon:"N5"},jlpt_n4:{name:"JLPT N4",icon:"N4"},jlpt_n3:{name:"JLPT N3",icon:"N3"},jlpt_n2:{name:"JLPT N2",icon:"N2"},jlpt_n1:{name:"JLPT N1",icon:"N1"},custom:{name:"Custom",icon:"自",pic:"pencil"}};
-const APP_VERSION='2026-11-25.4';
+const APP_VERSION='2026-11-25.5';
 const CAT_ORDER=Object.keys(CATEGORIES);
 // Combos sit outside the default selection: with nothing picked, a quiz covers every other category.
 const OPT_IN_CATS=['hiragana_combo','katakana_combo'];
@@ -2064,7 +2065,7 @@ function unlockBody(){document.body.style.position='';document.body.style.width=
 // New screen: back to the top with no leftover momentum (iOS ignores scrollTop while a fling is running).
 function scrollTopNow(){const sc=scroller(),keep=sc.style.overflowY;sc.style.overflowY='hidden';sc.scrollTop=0;requestAnimationFrame(()=>{sc.style.overflowY=keep})}
 function showScreen(name){
-  if(name==='quiz')lockBody();else unlockBody();
+  if(name==='quiz')lockBody();else{unlockBody();const a=document.activeElement;if(a&&a.id==='quiz-input')a.blur()}
   ['menu','quiz','done','add','browse'].forEach(s=>{const el=document.getElementById('screen-'+s);if(el)el.classList.toggle('hidden',s!==name)});
   if(timerInterval&&name!=='quiz'){clearInterval(timerInterval);timerInterval=null}
   scrollTopNow();
@@ -2328,7 +2329,8 @@ function renderPreview(w){
   document.getElementById('quiz-hint-btn-area').innerHTML='';
   quizHeader();
   document.getElementById('quiz-feedback-area').innerHTML='<div class="newword"><div class="eyebrow">New word</div><div class="mean">'+escapeHTML(w.english.join(' / '))+'</div></div>'+exampleHTML(w);
-  document.getElementById('quiz-input-area').innerHTML='<button class="btn primary big full" onclick="gotIt()">Got it '+ico('next')+'</button>';
+  if(quizMode==='choice'){placeRow(false);document.getElementById('quiz-input-area').innerHTML='<button class="btn primary big full" onclick="gotIt()">Got it '+ico('next')+'</button>'}
+  else answerRow('gotit');
   _previewShownAt=Date.now();
   setTimeout(()=>speakJapanese(w.japanese,w.furigana),200);
 }
@@ -2424,19 +2426,50 @@ function renderQuiz(){
   else fbArea.innerHTML='';
 
   const inputArea=document.getElementById('quiz-input-area');
-  if(!quizFeedback){
-    if(quizMode==='choice'){
-      const choices=buildChoices(w);
-      inputArea.innerHTML='<div class="choices">'+choices.map(c=>'<button class="btn" data-id="'+c.id+'" onclick="submitChoice(\''+c.id+'\',\''+w.id+'\')">'+escapeHTML(c.english[0])+'</button>').join('')+'</div>';
-    } else {
-      const ph=isCharMode(w)?'Type the romaji':quizMode==='reverse'?'Type the Japanese':quizMode==='conjugation'?'Type the form in kana or kanji':'Type the English meaning';
-      inputArea.innerHTML='<div id="timer-bar"></div><div class="row"><input class="input'+(quizMode==='reverse'||quizMode==='conjugation'?' jp':'')+'" id="quiz-input" placeholder="'+ph+'" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" onkeydown="quizKeydown(event)"><button class="btn primary" onclick="submitQuiz()">Check</button></div>';
-      {const el=document.getElementById('quiz-input');if(el)el.focus();}
-      if(timedMode)startTimer();
-    }
+  if(quizMode!=='choice'){
+    const ph=isCharMode(w)?'Type the romaji':quizMode==='reverse'?'Type the Japanese':quizMode==='conjugation'?'Type the form in kana or kanji':'Type the English meaning';
+    answerRow(quizFeedback?'next':'ask',ph);
+    if(!quizFeedback&&timedMode)startTimer();
+  } else if(!quizFeedback){
+    placeRow(false);
+    const choices=buildChoices(w);
+    inputArea.innerHTML='<div class="choices">'+choices.map(c=>'<button class="btn" data-id="'+c.id+'" onclick="submitChoice(\''+c.id+'\',\''+w.id+'\')">'+escapeHTML(c.english[0])+'</button>').join('')+'</div>';
   } else {
     inputArea.innerHTML='<button class="btn big full" onclick="nextQuiz()">Next '+ico('next')+'</button>';
   }
+}
+// Typed modes keep one answer row, and so the keyboard, for the whole session (2026-11-25.5).
+// Enter checks, Enter again moves on; the row sits under the word, so the keyboard never covers it,
+// and the buttons never take focus, so tapping them keeps the keyboard up too.
+function placeRow(typed){
+  const card=document.getElementById('quiz-card'),row=document.getElementById('quiz-input-area'),fb=document.getElementById('quiz-feedback-area');
+  if(typed&&row.nextElementSibling!==fb)card.insertBefore(row,fb);
+  else if(!typed&&fb.nextElementSibling!==row)card.insertBefore(row,fb.nextSibling);
+}
+function answerRow(state,ph){
+  placeRow(true);
+  const area=document.getElementById('quiz-input-area');
+  let el=document.getElementById('quiz-input');
+  if(!el){
+    area.innerHTML='<div id="timer-bar"></div><div class="row"><input class="input" id="quiz-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="btn primary" id="quiz-act" onpointerdown="event.preventDefault()" onmousedown="event.preventDefault()"></button></div>';
+    el=document.getElementById('quiz-input');
+    el.addEventListener('keydown',quizKeydown);
+    // Locked (after an answer, or on a new-word card): keystrokes do nothing but Enter.
+    el.addEventListener('beforeinput',e=>{if(el.dataset.lock!==undefined)e.preventDefault()});
+    el.addEventListener('input',()=>{if(el.dataset.lock!==undefined)el.value=el.dataset.lock});
+  }
+  const btn=document.getElementById('quiz-act');
+  el.classList.toggle('jp',quizMode==='reverse'||quizMode==='conjugation');
+  if(state==='ask'){
+    delete el.dataset.lock;el.classList.remove('locked');el.value='';el.placeholder=ph||'';el.enterKeyHint='go';
+    btn.className='btn primary';btn.innerHTML='Check';btn.onclick=submitQuiz;
+  } else {
+    const v=state==='next'?quizLastInput:'';
+    el.dataset.lock=v;el.value=v;el.classList.add('locked');el.placeholder=state==='gotit'?'Enter to continue':'';el.enterKeyHint='next';
+    btn.className='btn primary';btn.innerHTML=(state==='gotit'?'Got it ':'Next ')+ico('next');btn.onclick=state==='gotit'?gotIt:nextQuiz;
+    const bar=document.getElementById('timer-bar');if(bar)bar.innerHTML='';
+  }
+  if(document.activeElement!==el)el.focus({preventScroll:true});
 }
 function submitChoice(chosenId,correctId){
   if(timerInterval){clearInterval(timerInterval);timerInterval=null}
@@ -2494,7 +2527,13 @@ function nextQuiz(){
   playClick();_undo=null;
   quizFeedback=null;quizShowHint=false;quizLastInput="";quizIdx++;renderQuiz();
 }
-function quizKeydown(e){if(e.key==='Enter'){if(quizFeedback)nextQuiz();else submitQuiz()}}
+function quizKeydown(e){
+  if(e.key!=='Enter')return;
+  e.preventDefault();e.stopPropagation();
+  if(quizFeedback){if(Date.now()-_feedbackShownAt>300)nextQuiz()}
+  else if(_previewShownAt>0){if(Date.now()-_previewShownAt>300){_previewShownAt=0;gotIt()}}
+  else submitQuiz();
+}
 
 let _feedbackShownAt=0;
 let _previewShownAt=0;
@@ -3047,8 +3086,12 @@ hydrateIcons();
 loadStorage();loadSettings();showScreen('menu');
 jpSync.start();
 
-// Shrink quiz card when iOS keyboard appears (visual viewport shrinks)
-// Keyboard layout: screen is fixed so content stays put when keyboard opens
+// iOS pans the whole page when the keyboard opens (the quiz locks scrolling, so the page itself moves).
+// While the quiz is open, undo any pan so the card stays put (2026-11-25.5).
+if(window.visualViewport){
+  const pin=()=>{const q=document.getElementById('screen-quiz');if(q&&!q.classList.contains('hidden')&&(window.scrollY||visualViewport.offsetTop))window.scrollTo(0,0)};
+  visualViewport.addEventListener('scroll',pin);visualViewport.addEventListener('resize',pin);window.addEventListener('scroll',pin);
+}
 
 </script>
 </body>
