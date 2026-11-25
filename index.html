@@ -249,7 +249,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .newword .mean{font-size:20px;font-weight:600}
 .qinput{width:100%;display:flex;flex-direction:column;gap:8px}
 .qinput .row .input{flex:1}
-.qinput .input.locked{color:var(--text-2)}
+.qinput .input.locked{color:var(--text-2);caret-color:transparent}
 .choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
 .choices .btn{min-height:52px;white-space:normal;line-height:1.25}
 .choices .btn.right{background:color-mix(in srgb,var(--good) 20%,var(--ground));border-color:var(--good)}
@@ -374,7 +374,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
 <script>
 const CATEGORIES={hiragana:{name:"Hiragana",icon:"あ"},katakana:{name:"Katakana",icon:"ア"},hiragana_combo:{name:"Combos",icon:"きゃ"},katakana_combo:{name:"Combos",icon:"キャ"},greetings:{name:"Greetings",icon:"挨",pic:"hand-stop"},numbers:{name:"Numbers",icon:"数",pic:"abacus"},food:{name:"Food & drink",icon:"食",pic:"bowl-chopsticks"},shopping:{name:"Shopping",icon:"買",pic:"shopping-bag"},directions:{name:"Directions",icon:"道",pic:"compass"},transport:{name:"Transport",icon:"車",pic:"train"},accommodation:{name:"Lodging",icon:"宿",pic:"bed"},restaurant:{name:"Restaurant",icon:"店",pic:"tools-kitchen-2"},sightseeing:{name:"Sightseeing",icon:"観",pic:"torii"},time:{name:"Time & days",icon:"時",pic:"clock"},people:{name:"People",icon:"人",pic:"users"},adjectives:{name:"Adjectives",icon:"形",pic:"sparkles"},verbs:{name:"Verbs",icon:"動",pic:"run"},essentials:{name:"Essentials",icon:"要",pic:"first-aid-kit"},conversation:{name:"Conversation",icon:"話",pic:"messages"},slang:{name:"Slang",icon:"俗",pic:"flame"},jlpt_n5:{name:"JLPT N5",icon:"N5"},jlpt_n4:{name:"JLPT N4",icon:"N4"},jlpt_n3:{name:"JLPT N3",icon:"N3"},jlpt_n2:{name:"JLPT N2",icon:"N2"},jlpt_n1:{name:"JLPT N1",icon:"N1"},custom:{name:"Custom",icon:"自",pic:"pencil"}};
-const APP_VERSION='2026-11-25.5';
+const APP_VERSION='2026-11-25.6';
 const CAT_ORDER=Object.keys(CATEGORIES);
 // Combos sit outside the default selection: with nothing picked, a quiz covers every other category.
 const OPT_IN_CATS=['hiragana_combo','katakana_combo'];
@@ -2454,7 +2454,8 @@ function answerRow(state,ph){
     area.innerHTML='<div id="timer-bar"></div><div class="row"><input class="input" id="quiz-input" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="btn primary" id="quiz-act" onpointerdown="event.preventDefault()" onmousedown="event.preventDefault()"></button></div>';
     el=document.getElementById('quiz-input');
     el.addEventListener('keydown',quizKeydown);
-    // Locked (after an answer, or on a new-word card): keystrokes do nothing but Enter.
+    // Locked (after an answer, or on a new-word card): keystrokes do nothing but Enter,
+    // and the caret is hidden (CSS .locked) while focus stays, so the keyboard stays up (2026-11-25.6).
     el.addEventListener('beforeinput',e=>{if(el.dataset.lock!==undefined)e.preventDefault()});
     el.addEventListener('input',()=>{if(el.dataset.lock!==undefined)el.value=el.dataset.lock});
   }
