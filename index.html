@@ -374,7 +374,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
 <script>
 const CATEGORIES={hiragana:{name:"Hiragana",icon:"あ"},katakana:{name:"Katakana",icon:"ア"},hiragana_combo:{name:"Combos",icon:"きゃ"},katakana_combo:{name:"Combos",icon:"キャ"},greetings:{name:"Greetings",icon:"挨",pic:"hand-stop"},numbers:{name:"Numbers",icon:"数",pic:"abacus"},food:{name:"Food & drink",icon:"食",pic:"bowl-chopsticks"},shopping:{name:"Shopping",icon:"買",pic:"shopping-bag"},directions:{name:"Directions",icon:"道",pic:"compass"},transport:{name:"Transport",icon:"車",pic:"train"},accommodation:{name:"Lodging",icon:"宿",pic:"bed"},restaurant:{name:"Restaurant",icon:"店",pic:"tools-kitchen-2"},sightseeing:{name:"Sightseeing",icon:"観",pic:"torii"},time:{name:"Time & days",icon:"時",pic:"clock"},people:{name:"People",icon:"人",pic:"users"},adjectives:{name:"Adjectives",icon:"形",pic:"sparkles"},verbs:{name:"Verbs",icon:"動",pic:"run"},essentials:{name:"Essentials",icon:"要",pic:"first-aid-kit"},conversation:{name:"Conversation",icon:"話",pic:"messages"},slang:{name:"Slang",icon:"俗",pic:"flame"},jlpt_n5:{name:"JLPT N5",icon:"N5"},jlpt_n4:{name:"JLPT N4",icon:"N4"},jlpt_n3:{name:"JLPT N3",icon:"N3"},jlpt_n2:{name:"JLPT N2",icon:"N2"},jlpt_n1:{name:"JLPT N1",icon:"N1"},custom:{name:"Custom",icon:"自",pic:"pencil"}};
-const APP_VERSION='2026-11-25.6';
+const APP_VERSION='2026-11-25.7';
 const CAT_ORDER=Object.keys(CATEGORIES);
 // Combos sit outside the default selection: with nothing picked, a quiz covers every other category.
 const OPT_IN_CATS=['hiragana_combo','katakana_combo'];
@@ -1734,6 +1734,7 @@ let progress={},customWords=[],selectedCats=new Set(),wordOverrides={};
 let quizQueue=[],quizIdx=0,quizAnswered=0,quizCorrect=0,quizFeedback=null,quizShowHint=false,quizLastInput="";
 let quizTotalUnique=0,quizSeenIds=new Set(),quizProgressMax=0;
 let showNewWordCard=true; // settings toggle
+let speakAloud=true; // settings toggle: read words out by itself (2026-11-25.7)
 let currentStreak=0; // in-quiz consecutive correct
 // Within-session Leitner buckets: tracks how many times each word answered correctly this session
 // Bucket spacing: 0->requeue in 2-4, 1->requeue in 4-7, 2->requeue in 8-12, 3=graduated
@@ -1782,8 +1783,8 @@ function logActivity(type){
   }catch{}
 }
 function getActivityLog(){try{return JSON.parse(localStorage.getItem(STORAGE.activityLog)||'{}')}catch{return{}}}
-function loadSettings(){try{const s=JSON.parse(localStorage.getItem(STORAGE.settings)||'{}');showNewWordCard=s.showNewWordCard!==false;}catch{}}
-function saveSettings(){localStorage.setItem(STORAGE.settings,JSON.stringify({showNewWordCard}))}
+function loadSettings(){try{const s=JSON.parse(localStorage.getItem(STORAGE.settings)||'{}');showNewWordCard=s.showNewWordCard!==false;speakAloud=s.speakAloud!==false;}catch{}}
+function saveSettings(){localStorage.setItem(STORAGE.settings,JSON.stringify({showNewWordCard,speakAloud}))}
 
 function loadStorage(){
   try{progress=JSON.parse(localStorage.getItem(STORAGE.progress)||"{}")}catch{progress={}}
@@ -1987,6 +1988,9 @@ function playTimerOut(){playTone(200,.3,'sawtooth',.1,0)}
 
 // ============ SPEECH ============
 function speakJapanese(text,furigana){if(!('speechSynthesis' in window))return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(furigana||text);u.lang='ja-JP';u.rate=.85;const voices=window.speechSynthesis.getVoices();const ja=voices.find(v=>v.lang.startsWith('ja'));if(ja)u.voice=ja;window.speechSynthesis.speak(u)}
+// Speech the app starts by itself. Off in Settings, it stays quiet (iOS pauses music for speech);
+// Listen mode and taps on a speaker still speak.
+function autoSpeak(w){if(speakAloud||quizMode==='listen')speakJapanese(w.japanese,w.furigana)}
 function speakCurrent(){if(quizQueue.length===0||quizIdx>=quizQueue.length)return;const w=quizQueue[quizIdx];speakJapanese(w.japanese,w.furigana)}
 if('speechSynthesis' in window){window.speechSynthesis.getVoices();window.speechSynthesis.onvoiceschanged=function(){window.speechSynthesis.getVoices()}}
 
@@ -2213,7 +2217,7 @@ function timeUp(){
   const w=quizQueue[quizIdx];
   quizLastInput="(time up)";
   gradeAnswer(w,false,true);
-  speakJapanese(w.japanese,w.furigana);renderQuiz();
+  autoSpeak(w);renderQuiz();
 }
 let _undo=null; // the last typed miss, while its card is still showing
 function undoMiss(){
@@ -2332,7 +2336,7 @@ function renderPreview(w){
   if(quizMode==='choice'){placeRow(false);document.getElementById('quiz-input-area').innerHTML='<button class="btn primary big full" onclick="gotIt()">Got it '+ico('next')+'</button>'}
   else answerRow('gotit');
   _previewShownAt=Date.now();
-  setTimeout(()=>speakJapanese(w.japanese,w.furigana),200);
+  setTimeout(()=>autoSpeak(w),200);
 }
 function gotIt(){
   playClick();
@@ -2484,7 +2488,7 @@ function submitChoice(chosenId,correctId){
     else if(b.dataset.id===chosenId&&!isCorrect)b.classList.add('miss');
     b.disabled=true;
   });
-  setTimeout(()=>{if(!document.getElementById("screen-quiz").classList.contains("hidden")){speakJapanese(w.japanese,w.furigana);renderQuiz()}},800);
+  setTimeout(()=>{if(!document.getElementById("screen-quiz").classList.contains("hidden")){autoSpeak(w);renderQuiz()}},800);
 }
 
 function submitQuiz(){
@@ -2499,7 +2503,7 @@ function submitQuiz(){
     ?matchAnswer(val,listenAnswers(w))
     :matchAnswer(val,w.english);
   gradeAnswer(w,isCorrect);
-  speakJapanese(w.japanese,w.furigana);renderQuiz();
+  autoSpeak(w);renderQuiz();
 }
 function showQuizInfo(){
   openSheet(`<h3>How scoring works</h3>
@@ -2793,6 +2797,7 @@ function importData(event){const file=event.target.files[0];if(!file)return;cons
 function openSettings(){
   openSheet(`<h3>Settings</h3>
     <label class="switch"><span><span style="display:block;font-weight:500">New word card</span><span class="sub">Show the meaning before the first question on a word</span></span><input type="checkbox" id="setting-newcard" onchange="showNewWordCard=this.checked;saveSettings()" ${showNewWordCard?'checked':''}></label>
+    <label class="switch"><span><span style="display:block;font-weight:500">Read words aloud</span><span class="sub">Say each word without being asked. Speaker buttons and Listen mode always speak</span></span><input type="checkbox" id="setting-speak" onchange="speakAloud=this.checked;saveSettings()" ${speakAloud?'checked':''}></label>
     <div class="field"><span class="label">Sound</span><div class="row"><button class="btn small sq" id="settings-vol-icon" onclick="toggleMute()" aria-label="Mute"></button><input type="range" min="0" max="100" id="settings-volume-slider" oninput="setVolume(this.value)" value="${Math.round(volume*100)}"></div></div>
     <div class="field"><span class="label">Your data</span><div class="grid2"><button class="btn" onclick="exportData()">Export</button><button class="btn" onclick="document.getElementById('import-file').click()">Import</button></div></div>
     <button class="btn danger full" onclick="resetProgress(this)">Reset progress</button>
